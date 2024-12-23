@@ -1,0 +1,6 @@
+@Dac.API_HostAddress = http://localhost:5113
+
+GET {{Dac.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

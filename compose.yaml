@@ -1,0 +1,30 @@
+services:
+  neo4j:
+    image: neo4j:4.4
+    volumes:
+      - neo4jdata:/data
+      - neo4jlogs:/logs
+    environment:
+      NEO4J_AUTH: neo4j/daccydac
+    networks:
+      - dacOdac_network  
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+  api:
+    image: dac.api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - "neo4j"
+    networks:
+      - dacOdac_network
+    ports:
+      - "127.0.0.1:5113:5113"
+networks:
+  dacOdac_network:
+    driver: bridge
+volumes:
+  neo4jdata:
+  neo4jlogs:

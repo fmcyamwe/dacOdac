@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dac.API", "Dac.API\Dac.API.csproj", "{B19882AA-8F58-4460-937B-785EB06D67DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dac.Neo", "Dac.Neo\Dac.Neo.csproj", "{9015A576-462F-4422-9F7E-D6BD74D52B9C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B19882AA-8F58-4460-937B-785EB06D67DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B19882AA-8F58-4460-937B-785EB06D67DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B19882AA-8F58-4460-937B-785EB06D67DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B19882AA-8F58-4460-937B-785EB06D67DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9015A576-462F-4422-9F7E-D6BD74D52B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9015A576-462F-4422-9F7E-D6BD74D52B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9015A576-462F-4422-9F7E-D6BD74D52B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9015A576-462F-4422-9F7E-D6BD74D52B9C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
