@@ -1,19 +1,25 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace Dac.Neo.Model; 
 
 public class Doctor
 {
-    public int Id { get; set;} //tab for auto-completion
+    [JsonPropertyName("id"), JsonIgnore]
+    public string? Id { get; set;} //annoying tab for auto-completion
 
-    public string? Name { get; set;}//huh weird those ?
-    public string? Speciality { get; set;}
+    //could be skipped and default to 'Dr.'
+    [JsonPropertyName("firstName")] public string? FirstName { get; set;}
+
+    [Required]
+    [JsonPropertyName("lastName")]
+    public required string LastName { get; set;}
+
+    [JsonPropertyName("speciality")]
+    public string? Speciality { get; set;}  //requiered?
 
     //phone? or contact info...
-    
-    public int? Born { get; set;}  //PII >>needs Auth**
-    public DateTime VisitDate { get; set;}
-
-    //medical history(or) //DEF need auth**
-
-    //emergency_contact (can access medical history too)
+    [JsonPropertyName("practising")]
+    public DateTime? PractisingSince { get; set;} //requiered?
 
 }

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Neo4j.Driver;
+//using Dac.API.Interfaces; //nope circular dependy or have to create third project--oh vey
 
-
-namespace Dac.Neo.Repositories;
+namespace Dac.Neo.Data;
 
     //should be in own file but for brevity
     public interface INeo4jDataAccess : IAsyncDisposable
@@ -14,13 +14,15 @@ namespace Dac.Neo.Repositories;
         Task<T> ExecuteReadScalarAsync<T>(string query, IDictionary<string, object>? parameters = null);
 
         Task<T> ExecuteWriteTransactionAsync<T>(string query, IDictionary<string, object>? parameters = null);
+
+        Task ExecuteWriteTransactionAsync(string query, IDictionary<string, object>? parameters = null);
     }
 
     public class Neo4jDataAccess : INeo4jDataAccess
     {
         private IAsyncSession _session;
 
-        private ILogger<Neo4jDataAccess> _logger; //huh complains when using above not present--not generic?!? 
+        private ILogger<Neo4jDataAccess> _logger;
 
         private string _database;
 
@@ -64,36 +66,7 @@ namespace Dac.Neo.Repositories;
                     T scalar = default(T);
 
                     var res = await tx.RunAsync(query, parameters);
-
-                    scalar = (await res.SingleAsync())[0].As<T>();
-
-                    return scalar;
-                });
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was a problem while executing database query");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Execute write transaction
-        /// </summary>
-        public async Task<T> ExecuteWriteTransactionAsync<T>(string query, IDictionary<string, object>? parameters = null)
-        {
-            try
-            {
-                parameters = parameters == null ? new Dictionary<string, object>() : parameters;
-
-                var result = await _session.WriteTransactionAsync(async tx =>
-                {
-                    T scalar = default(T);
-
-                    var res = await tx.RunAsync(query, parameters);
-
+                    
                     scalar = (await res.SingleAsync())[0].As<T>();
 
                     return scalar;
@@ -138,6 +111,54 @@ namespace Dac.Neo.Repositories;
                 throw;
             }
         }
+                
+        /// <summary>
+        /// Execute write transaction with return value
+        /// </summary>
+        public async Task<T> ExecuteWriteTransactionAsync<T>(string query, IDictionary<string, object>? parameters = null)
+        {
+            try
+            {
+                parameters = parameters == null ? new Dictionary<string, object>() : parameters;
+
+                var result = await _session.WriteTransactionAsync(async tx =>
+                {
+                    T scalar = default(T);
+
+                    var res = await tx.RunAsync(query, parameters);
+
+                    scalar = (await res.SingleAsync())[0].As<T>();
+
+                    return scalar;
+                });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was a problem while executing database query");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Execute write transaction with no return value
+        /// </summary>
+        public async Task ExecuteWriteTransactionAsync(string query, IDictionary<string, object>? parameters = null)
+        {
+            try
+            {
+                parameters = parameters == null ? new Dictionary<string, object>() : parameters;
+                
+                await _session.WriteTransactionAsync(tx => tx.RunAsync(query, parameters));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was a problem while executing database query");
+                throw;
+            }
+        }
+
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or

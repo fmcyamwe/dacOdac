@@ -2,8 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Dac.Neo.Repositories;
+
 using Dac.Neo.Data;
+using Dac.Neo.Data.Configurations;
 
 using Neo4j.Driver;
 
@@ -21,34 +22,63 @@ public static class Neo4jExtensions
         services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
         var settings = new ApplicationSettings();
         configuration.GetSection("ApplicationSettings").Bind(settings);
-
+  
         //services.AddSingleton(GraphDatabase.Driver(
         //    settings.Neo4jConnection, 
         //    AuthTokens.Basic(settings.Neo4jUser, settings.Neo4jPassword)
         //));
         
+        Console.WriteLine("ConfigureNeo4jService:: {0}-{1}-{2}",settings.Neo4jConnection,settings.Neo4jUser, settings.Neo4jPassword);
 
-        var driver = GraphDatabase.Driver(//Driver(uri, AuthTokens.Basic(user, password));
+        var driver = GraphDatabase.Driver(
             settings.Neo4jConnection, 
             AuthTokens.Basic(settings.Neo4jUser, settings.Neo4jPassword));
         
-        services.AddSingleton(driver);
+        //verify connection...
+        driver.VerifyConnectivityAsync();  //could result in Exception so surround with try/catch --todo** //driver.CloseAsync()
 
-        //verify connection...could throw error so should surround with try/catch prolly... 
-        //>>so far no issue(even in docker!) >>oh prolly have to await result LOL
-        driver.VerifyConnectivityAsync();
+        services.AddSingleton(driver); 
 
-        //Data Access Wrapper over Neo4j session, 
-        //that is a helper class for executing parameterized Neo4j Cypher queries in Transactions
-        services.AddScoped<INeo4jDataAccess, Neo4jDataAccess>();
+        //services.AddScoped(typeof(INeo4jDataAccess).GetTypeInfo().Assembly);
+        //services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
+
+         //wonder if shouldnt move these over in root with all the troubles Seeding smh >>nope same errors
         
-        //registration for domain repository class
-        services.AddTransient<IPatientRepository, PatientRepository>();
+        //Data Access Wrapper over Neo4j session, 
+        //helper class for executing parameterized Neo4j Cypher queries in Transactions
+        services.AddScoped<INeo4jDataAccess, Neo4jDataAccess>();
 
-        //todo**n add for DoctorRepository too(although it will prolly be small)
-
-        services.AddTransient<ISeeder, SeedGraphDB>();
-
+        services.AddScoped<ISeeder, Seeder>(); 
+   
+        
+        //registration for domain repository class--done at call site
+        //services.AddTransient<IPatientRepository, PatientRepository>();
+        
         return services;
+    }
+
+    public static async void CheckMigration(IServiceProvider sp){
+  
+        var sd = sp.GetService<ISeeder>();
+        if (sd == null){
+            Console.WriteLine("CheckMigration::Seeder == null>> Aborting :(...");
+            return;
+        }//else{Console.WriteLine("CheckMigration::Seeder GOOD {0}",sd);} 
+        
+        bool populated = await sd.AlreadyPopulated(); 
+        
+        if(populated){
+            return;
+        }
+
+        await sd.CreatePatientNodeConstraints();
+
+        await sd.CreateDoctorNodeConstraint();
+                
+        //todo** seed graphDB with initial data...
+
+        //Console.WriteLine("CheckMigration::CreateConstraints >>"); //
+
+       return;
     }
 }

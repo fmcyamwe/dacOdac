@@ -1,4 +1,6 @@
 
+using Dac.API.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,16 +11,27 @@ builder.Services.AddSwaggerGen();
 
 builder.AddApplicationServices(); //setup Neo4J
 
-builder.Services.AddControllers();
 
-//builder.Services.AddSingleton<EndpointConfigurator>(); //? neither :(
+/* todo** >> especially for docker >> need BaseUrlConfiguration in json file (could also separate urls for api and web ui)
+var baseUrlConfig = configSection.Get<BaseUrlConfiguration>(); */
+const string CORS_POLICY = "CorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: CORS_POLICY,
+        corsPolicyBuilder =>
+        {
+            //corsPolicyBuilder.WithOrigins(baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
+            corsPolicyBuilder.AllowAnyMethod();
+            corsPolicyBuilder.AllowAnyHeader();
+            corsPolicyBuilder.AllowAnyOrigin();
+            corsPolicyBuilder.WithOrigins("localhost"); //allow from localhost origins //use this instead of above
+            corsPolicyBuilder.SetIsOriginAllowed(origin => true); //{
+                //return whitelist.Contains(origin); //whitelist is array passed in .WithOrigins 
+                //});
+                //"Access-Control-Allow-Origin" true);
+        });
+});
 
-//builder.Services.AddSingleton<PatientListEndpoint>(); //huh this? >>nope cant consume Repository
-
-//var p = builder.Services.AddScoped<PatientListEndpoint>(); //work?!? >>nope
-
-
-Console.WriteLine("coliiis");
 
 var app = builder.Build();
 
@@ -26,54 +39,28 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); //toTest changing in docker
+    });
 }
-//could do above even when not in developement with below...
-/*app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-});*/
 
 //app.AddControllers(); //Yeeeyuh worked :) but not needed
 
 app.UseRouting();
-app.MapControllers(); //bon shall just keep using this with default controllers estiii
+app.UseCors(CORS_POLICY);
+
+//app.UseAuthorization(); //toTest* and has to be between useRouting & mapControllers
+
+app.MapControllers(); //bon keep using default controllers estiii
+
+app.UseStatusCodePages(); //toTest if should use?!? 
 app.MapDefaultControllerRoute();
 
+//app.UseHttpsRedirection();
+app.UseAuthentication();
 
-//app.MapAreaControllerRoute
-
-app.UseHttpsRedirection();
-//app.UseAuthentication();  //huh no issue
+//app.UseAntiforgery(); //toTest**
 
 app.Run();
-
-
-/*
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-*/
-
