@@ -12,16 +12,14 @@ namespace Dac.API.Controllers;
 
 
 [Route("patients")]
-[ApiController]
-public class PatientController : ControllerBase  //todo** use BaseController
+public class PatientController : BaseController  //ControllerBase 
 {
-    //private readonly IPatientRepository _patientRepository;
-    protected readonly IApiManagerService _apiService;  //through service 
+    //protected readonly IApiManagerService _apiService;  //through service 
 
-    public PatientController(IApiManagerService apiService) //IPatientRepository patientRepository, 
+    public PatientController(IApiManagerService apiService) : base(apiService) 
     {
         //_patientRepository = patientRepository;
-        _apiService = apiService;
+        //_apiService = apiService;
     }
 
     //TypedResults.Ok(); 
@@ -29,7 +27,7 @@ public class PatientController : ControllerBase  //todo** use BaseController
     //annotations for openApi
 
     //Get patients/search
-    [Route("search")]
+    [Route("search")] 
     [HttpGet]
     [Tags("Patients")]
     [EndpointSummary("Search for a patient by Name")]

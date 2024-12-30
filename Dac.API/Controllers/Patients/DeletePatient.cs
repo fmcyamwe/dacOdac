@@ -12,7 +12,7 @@ using Dac.API.Services;
 namespace Dac.API.Controllers.Patients;
 
 //[Route("patients")]
-[ApiController]
+//[ApiController]
 public class DeletePatient : BaseController // ControllerBase
 {
     public DeletePatient(IApiManagerService apiService) : base(apiService)

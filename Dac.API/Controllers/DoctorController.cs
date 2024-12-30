@@ -5,24 +5,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults; 
 
-using Dac.API.Model;
 
-//using Dac.Neo.Repositories;
 using Dac.API.Services;
 
 namespace Dac.API.Controllers;
 
 
 [Route("doctors")]
-[ApiController]
-public class DoctorController : ControllerBase  //todo** use BaseController
+public class DoctorController : BaseController //ControllerBase
 {
     //private readonly IDoctorRepository _doctorRepository;
-    private readonly IApiManagerService _apiService; 
-    public DoctorController(IApiManagerService apiService) //IDoctorRepository doctorRepository,
+    //private readonly IApiManagerService _apiService; 
+    public DoctorController(IApiManagerService apiService) : base(apiService) 
     {
         //_doctorRepository = doctorRepository;
-        _apiService = apiService;
+        //_apiService = apiService;
     }
 
 

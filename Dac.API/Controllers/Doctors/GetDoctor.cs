@@ -12,7 +12,7 @@ using Dac.API.Services;
 namespace Dac.API.Controllers.Doctors;
 
 //[Route("doctors")]
-[ApiController]
+//[ApiController]
 public class GetDoctor : BaseController // ControllerBase
 {
     public GetDoctor(IApiManagerService apiService) : base(apiService)

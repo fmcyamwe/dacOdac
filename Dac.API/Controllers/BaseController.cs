@@ -14,16 +14,13 @@ using Dac.API.Services;
 
 namespace Dac.API.Controllers;
 
-[ApiController] //prolly needed
+[ApiController]
 public class BaseController : ControllerBase
 {
-    protected readonly IApiManagerService _apiService;  //through service 
+    protected readonly IApiManagerService _apiService;
 
-    public BaseController(IApiManagerService apiService) //IPatientRepository patientRepository, 
+    public BaseController(IApiManagerService apiService)
     {
-        //_patientRepository = patientRepository;
         _apiService = apiService;
     }
-
-
 }
