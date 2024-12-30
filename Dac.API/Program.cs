@@ -1,6 +1,7 @@
 
 using Dac.API.Extensions;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,27 +12,25 @@ builder.Services.AddSwaggerGen();
 
 builder.AddApplicationServices(); //setup Neo4J
 
-
+const string CORS_POLICY = "CorsPolicy";
 /* todo** >> especially for docker >> need BaseUrlConfiguration in json file (could also separate urls for api and web ui)
 var baseUrlConfig = configSection.Get<BaseUrlConfiguration>(); */
-const string CORS_POLICY = "CorsPolicy";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: CORS_POLICY,
-        corsPolicyBuilder =>
-        {
-            //corsPolicyBuilder.WithOrigins(baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
-            corsPolicyBuilder.AllowAnyMethod();
-            corsPolicyBuilder.AllowAnyHeader();
-            corsPolicyBuilder.AllowAnyOrigin();
-            corsPolicyBuilder.WithOrigins("localhost"); //allow from localhost origins //use this instead of above
-            corsPolicyBuilder.SetIsOriginAllowed(origin => true); //{
-                //return whitelist.Contains(origin); //whitelist is array passed in .WithOrigins 
-                //});
-                //"Access-Control-Allow-Origin" true);
-        });
+    corsPolicyBuilder =>
+    {
+        //corsPolicyBuilder.WithOrigins(baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
+        corsPolicyBuilder.AllowAnyMethod();
+        corsPolicyBuilder.AllowAnyHeader();
+        corsPolicyBuilder.AllowAnyOrigin();
+        corsPolicyBuilder.WithOrigins("localhost"); //allow from localhost origins //use this instead of above
+        corsPolicyBuilder.SetIsOriginAllowed(origin => true); //{
+        //return whitelist.Contains(origin); //whitelist is array passed in .WithOrigins 
+        //});
+        //"Access-Control-Allow-Origin" true);
+    });
 });
-
 
 var app = builder.Build();
 
@@ -53,7 +52,7 @@ app.UseCors(CORS_POLICY);
 
 //app.UseAuthorization(); //toTest* and has to be between useRouting & mapControllers
 
-app.MapControllers(); //bon keep using default controllers estiii
+app.MapControllers().WithOpenApi(); //withOpenApi?
 
 app.UseStatusCodePages(); //toTest if should use?!? 
 app.MapDefaultControllerRoute();
@@ -61,6 +60,6 @@ app.MapDefaultControllerRoute();
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 
-//app.UseAntiforgery(); //toTest**
+//app.UseAntiforgery(); //toUse** with POST endpoints >> need to invoke AddAntiforgery() in services.... >>Nope still bork on Post
 
 app.Run();
