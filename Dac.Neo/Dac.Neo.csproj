@@ -11,7 +11,11 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Neo4j.Driver" Version="4.4.0" />
+    <PackageReference Include="Neo4j.Driver.Extensions" Version="1.0.14" />
+    
+    <PackageReference Include="Neo4j.Driver" Version="4.3.2" >
+    <Aliases>CustomTypes</Aliases>
+    </PackageReference> 
   </ItemGroup>
 
 </Project>

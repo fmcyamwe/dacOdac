@@ -1,8 +1,9 @@
+using Microsoft.Extensions.Logging;
 using Dac.Neo.Model; 
-using Dac.Neo.Data;
-using Neo4j.Driver;
+using Dac.Neo.Data.Model;
+//using Neo4j.Driver;
 
-namespace Dac.API.Repositories;
+namespace Dac.Neo.Repositories;
     
     public class DoctorRepository : IDoctorRepository
     {
@@ -69,23 +70,38 @@ namespace Dac.API.Repositories;
 
         }
 
+        public async Task<List<Dictionary<string, object>>> GetAllDoctors() //todo** paginate
+        {
+            var query = @"Match (d:Doctor) 
+            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } LIMIT 20"; 
+            //order by?
+            //coalesce for missing info prolly --todo**
+            //should upper-case first letter --todo**
+            var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d");
+
+            _logger.LogInformation("GetAllDoctors {count}", doctors.Count);
+
+            return doctors;
+        }
+
         /// <summary>
         /// Add a doctor
         /// </summary>
-        public async Task<string> AddDoctor(Doctor doctor)
+        public async Task<string> AddDoctor(DoctorDB doctor)
         {
             if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName))
             {
-                var query = @"MERGE (d:Doctor {lastName: $lastName})
-                            ON CREATE SET d.id = $id, d.firstName = $firstName, d.speciality = $speciality
-                            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id"; //RETURN true
+                
+                var query = @"MERGE (d:Doctor {lastName: $lastName, speciality: $speciality})
+                            ON CREATE SET d.id = $id, d.firstName = $firstName, d.practiseSince = $practiseSince
+                            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
                 IDictionary<string, object> parameters = new Dictionary<string, object> 
                 { 
                     { "lastName", doctor.LastName },
                     { "firstName", doctor.FirstName?.Trim() ?? "Dr"}, //default to 'Dr'
                     { "speciality", doctor.Speciality ?? ""}, //toReview** if shouldnt be requiered
                     { "id", Guid.NewGuid().ToString()[^12..]}, //robust than Neo4J's ID(p) //saving last part >> NewGuid.ToString()[^12..]
-                    { "practisingSince", doctor.PractisingSince ?? DateTime.Now}
+                    { "practiseSince", doctor.PractiseSince ?? DateTime.Now}
                     
                 };
                 return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
@@ -99,7 +115,7 @@ namespace Dac.API.Repositories;
         /// <summary>
         /// Get count of patients in Doctor's care.
         /// </summary>
-        public async Task<long> GetPatientsCount(string id)
+        public async Task<long> GetPatientsCount(string id) //todo** should be a list
         {
             //todo** use id and change to query Relationship
             var query = @"Match (d:Doctor) RETURN count(d) as patientCount";
@@ -116,33 +132,34 @@ namespace Dac.API.Repositories;
             return Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
         }
 
-        public async Task<Doctor> FetchDoctorByID(string id)
+        public async Task<DoctorDB> FetchDoctorByID(string id)
         {
-            var query = @"Match (d:Doctor {id: $id}) 
-                        RETURN d{ Id: d.id, FirstName: d.firstName, LastName: d.lastName, Speciality: COALESCE(d.speciality,'') }";
+            var query = @"Match (d:Doctor {id: $id}) RETURN d";
+                        //RETURN d{ Id: d.id, FirstName: d.firstName, LastName: d.lastName, Speciality: COALESCE(d.speciality,'') }";
                         
             IDictionary<string, object> parameters = new Dictionary<string, object> 
             { 
                 { "id", id },
             };
 
-            var doc = await _neo4jDataAccess.ExecuteReadScalarAsync<object>(query, parameters);
+            var doc = await _neo4jDataAccess.ExecuteReadScalarToModelAsync<DoctorDB>(query, "d", parameters); //<ILookupDataResponse<DoctorDB>>
             //error out >>  Unable to cast object of type `Neo4j.Driver.Internal.Types.Node` to type `Dac.Neo.Model.Patient`.
             //prolly should be explicit in query with return values >>good but still borks
             //OR use <object> and cast/build into Doctor here? toSee**
 
             _logger.LogInformation("FetchDoctorByID {doc}", doc);
-            Console.WriteLine("FetchDoctorByID {0} >>type {1}", doc,doc.GetType());
+            Console.WriteLine("FetchDoctorByID {0} >> type {1}", doc,doc.GetType());
 
-            try
+            /*try
             {
                 var p = doc.As<Doctor>(); //bon to see
                 return p;
             }catch (Exception ex){
                 _logger.LogTrace(ex, "FetchDoctorByID Exception!! {doc}", doc);
                 throw;
-            }
-            //return doc;
+            }*/
+
+            return doc;
         }
         
     }

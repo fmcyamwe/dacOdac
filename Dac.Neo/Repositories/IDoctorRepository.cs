@@ -1,14 +1,15 @@
-using Dac.Neo.Model;
+using Dac.Neo.Data.Model;
 
-namespace Dac.API.Repositories;
+namespace Dac.Neo.Repositories;
     public interface IDoctorRepository
     {
+        Task<List<Dictionary<string, object>>> GetAllDoctors();
         Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);
         Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
         Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality(); //group
-        Task<string> AddDoctor(Doctor doc); 
+        Task<string> AddDoctor(DoctorDB doc); 
 
-        Task<Doctor> FetchDoctorByID(string id); //requiere auth!
+        Task<DoctorDB> FetchDoctorByID(string id); //requiere auth!
         //todo** 
         //addPatientTreatment
         //addMedicalRecord

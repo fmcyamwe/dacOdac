@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.Hosting;
-
-
-using Dac.Neo.Data;
-using Dac.Neo.Data.Configurations;
-
+using Microsoft.Extensions.DependencyInjection;
 using Neo4j.Driver;
+
+using Dac.Neo.Data.Configurations;
+using Dac.Neo.Repositories;
+
+
 
 namespace Dac.Neo;
 
@@ -42,8 +43,6 @@ public static class Neo4jExtensions
         //services.AddScoped(typeof(INeo4jDataAccess).GetTypeInfo().Assembly);
         //services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
-         //wonder if shouldnt move these over in root with all the troubles Seeding smh >>nope same errors
-        
         //Data Access Wrapper over Neo4j session, 
         //helper class for executing parameterized Neo4j Cypher queries in Transactions
         services.AddScoped<INeo4jDataAccess, Neo4jDataAccess>();
@@ -51,17 +50,18 @@ public static class Neo4jExtensions
         services.AddScoped<ISeeder, Seeder>(); 
    
         
-        //registration for domain repository class--done at call site
-        //services.AddTransient<IPatientRepository, PatientRepository>();
+        services.AddTransient<IPatientRepository, PatientRepository>();
+        services.AddTransient<IDoctorRepository, DoctorRepository>();
         
         return services;
     }
 
-    public static async void CheckMigration(IServiceProvider sp){
-  
+    public static async void CheckMigration(IServiceProvider sp)
+    {
+       
         var sd = sp.GetService<ISeeder>();
         if (sd == null){
-            Console.WriteLine("CheckMigration::Seeder == null>> Aborting :(...");
+            Console.WriteLine("CheckMigration::Seeder == null>> ERROR!! Aborting :(...");
             return;
         }//else{Console.WriteLine("CheckMigration::Seeder GOOD {0}",sd);} 
         

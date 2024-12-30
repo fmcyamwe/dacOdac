@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Dac.Neo.Model; 
 using Dac.Neo.Data;
-using Neo4j.Driver;
+using Dac.Neo.Data.Model;
+//using Neo4j.Driver;
 
-namespace Dac.API.Repositories;
+namespace Dac.Neo.Repositories;
     
     public class PatientRepository : IPatientRepository
     {
@@ -41,21 +42,22 @@ namespace Dac.API.Repositories;
         /// <summary>
         /// Add a new patient
         /// </summary>
-        public async Task<string> AddPatient(Patient person)
+        public async Task<string> AddPatient(PatientDB person)
         {
             if (person != null && !string.IsNullOrWhiteSpace(person.FirstName) && !string.IsNullOrWhiteSpace(person.LastName))
             {
                 Console.WriteLine("AddPatient {0} {1}", person.FirstName, person.LastName);
 
                 var query = @"MERGE (p:Patient {firstName: $firstName, lastName: $lastName})
-                            ON CREATE SET p.id = $id, p.born = $born
+                            ON CREATE SET p.id = $id, p.born = $born, p.gender = $gender
                             ON MATCH SET p.born = $born, p.updatedAt = timestamp() RETURN p.id";
                 IDictionary<string, object> parameters = new Dictionary<string, object> 
                 { 
                     { "firstName", person.FirstName },
                     { "lastName", person.LastName },
                     { "born", person.Born ?? 0 },
-                    { "id", Guid.NewGuid().ToString()[^12..] } //more robust than Neo4J's ID(p) //only saving last part
+                    { "id", Guid.NewGuid().ToString()[^12..] }, //more robust than Neo4J's ID(p) //only saving last part
+                    { "gender", person.Gender ?? ""},
                     //todo** add other props and update in query
                 };
                 return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
@@ -96,11 +98,11 @@ namespace Dac.API.Repositories;
         /// <summary>
         /// Retrieve patient by ID--everything about the patient
         /// </summary>
-        public async Task<Patient> FetchPatientByID(string id)
+        public async Task<PatientDB> FetchPatientByID(string id)
         {
-            var query = @"Match (p:Patient {id: $id}) 
-                        RETURN p{ Id: p.id, FirstName: p.firstName, LastName: p.lastName, Born: COALESCE(p.born, 0), Gender: COALESCE(p.gender, '') }";
-                        //toSee...with above...think just had to upper case return?!? or cause of empty properties?
+            var query = @"Match (p:Patient {id: $id}) RETURN p";
+                        //RETURN p{ Id: p.id, FirstName: p.firstName, LastName: p.lastName, Born: COALESCE(p.born, 0), Gender: COALESCE(p.gender, '') }";
+                        //toSee...with above...think just had to upper case return?!? or cause of empty properties? >> nope bork as casting from INode smh
                         //also cast born to int? meh no need toInteger()
 
             IDictionary<string, object> parameters = new Dictionary<string, object> 
@@ -108,24 +110,25 @@ namespace Dac.API.Repositories;
                 { "id", id },
             };
 
-            var patient = await _neo4jDataAccess.ExecuteReadScalarAsync<object>(query, parameters);
+            var patient = await _neo4jDataAccess.ExecuteReadScalarToModelAsync<PatientDB>(query, "p", parameters); //<ILookupDataResponse<PatientDB>>
             //error out >>  Unable to cast object of type `Neo4j.Driver.Internal.Types.Node` to type `Dac.Neo.Model.Patient`.
             //prolly should be explicit in query with return values- >>still borks
-            //OR use <object> and cast/build into Patient here? toSee**
-            //or just use Neo4J Extension package? todo**
+            //or just use Neo4J Extension package? >>tryin...(aint looking good >>gotta add lower Driver version...coliiiis)
 
+            //OR use <object> and cast/build into Patient here? >>first try was half successful at least--toTry** if Extension dont work
             _logger.LogInformation("FetchPatientByID {patient} >>type {type}", patient,patient.GetType());
-            Console.WriteLine("FetchPatientByID {0} >>type {1}", patient, patient.GetType()); //toSee
+            //Console.WriteLine("FetchPatientByID {0} >>type {1}", patient, patient.GetType()); //toSee
             //_logger.LogInformation("ExecuteReadScalarAsync {}", typeof(T));
-            try
+            /*try
             {
-                var p = patient.As<Patient>(); //bon to see >>nope still borks but does bring object back!!
+                var p = patient.As<Patient>(); //bon to see >>nope still borks BUT does bring object back!!
                 return p;
             }catch (Exception ex){
                 _logger.LogTrace(ex, "FetchPatientByID Exception!! {patient}", patient);
                 throw;
-            }
+            }*/
             //return patient.As<Patient>();
             //return patient;//.As<Patient>();
+            return patient;
         }
     }
