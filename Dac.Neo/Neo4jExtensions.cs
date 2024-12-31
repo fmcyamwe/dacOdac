@@ -73,7 +73,7 @@ public static class Neo4jExtensions
 
         await sd.CreatePatientNodeConstraints();
 
-        await sd.CreateDoctorNodeConstraint();
+        await sd.CreateDoctorNodeConstraints();
                 
         //todo** seed graphDB with initial data...
 

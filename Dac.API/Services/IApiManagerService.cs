@@ -13,6 +13,8 @@ public interface IApiManagerService
     Task<Patient> FetchPatientByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName);
 
+    Task<string> CreatePatientRequest(string patientId, VisitRequest v);
+
     /////Doctor/////
     Task<List<Dictionary<string, object>>> GetAllDoctors();
     Task<string> AddDoctor(Doctor doc); 
@@ -21,5 +23,6 @@ public interface IApiManagerService
     Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
     Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality();
     
-    Task<long> GetPatientsCount(string id);
+    Task<long> GetPatientsCount(string id); 
+    Task<List<Dictionary<string, object>>> GetPatientRequests(string id);
 }

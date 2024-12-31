@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 
 using Dac.API.Services;
+using Dac.API.Model; 
 
 namespace Dac.API.Controllers;
 
@@ -90,6 +91,21 @@ public class PatientController : BaseController  //ControllerBase
     public Task<IResult> AddPatientTreatment([FromRoute] string id) //toAdd** [FromBody] Treatment treatment
     {
         return (Task<IResult>)Results.Ok(true); //todo**
+    }
+
+    //POST patients/{id}/requests
+    [Route("{id}/requests")]
+    [HttpPost]
+    [Tags("Patients")]
+    [EndpointSummary("Request Visit")]
+    [EndpointDescription("Patient request visit from a doctor")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    public async Task<Ok<string>> CreateRequest([FromRoute] string id,[FromBody] VisitRequest request)  //Task<IResult> 
+    {
+        var c = await _apiService.CreatePatientRequest(id, request);
+        return TypedResults.Ok(c); //Results.Ok(true); //Task<IResult> 
     }
 
     

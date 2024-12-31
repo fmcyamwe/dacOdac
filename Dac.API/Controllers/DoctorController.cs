@@ -58,4 +58,20 @@ public class DoctorController : BaseController //ControllerBase
         //also  >> NotFound();
         return _apiService.ListDoctorsBySpeciality(search); //_doctorRepository
     }
+
+    //Get doctors/{id}/requests
+    [Route("{id}/requests")]
+    [HttpGet]
+    [Tags("Doctors")]
+    [EndpointSummary("Doctor Pending Requests")]
+    [EndpointDescription("List of Requests from patients")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    //[AllowAnonymous] //authorization
+    public Task<List<Dictionary<string, object>>> FetchDoctorsB([FromRoute] string id)
+    {
+        return _apiService.GetPatientRequests(id); //async? 
+    }
 }

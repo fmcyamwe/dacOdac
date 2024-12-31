@@ -8,7 +8,7 @@ public interface ISeeder
     {
         Task<bool> AlreadyPopulated();
         Task CreatePatientNodeConstraints(); //creates indexes underneath
-        Task CreateDoctorNodeConstraint();
+        Task CreateDoctorNodeConstraints();
         Task<bool> AddDummyData(); 
        
     }
@@ -75,15 +75,15 @@ public interface ISeeder
         /// <summary>
         /// Creates unique constraint on Doctor Node for lastName and id
         /// </summary>
-        public async Task CreateDoctorNodeConstraint()
+        public async Task CreateDoctorNodeConstraints()
         {
             ////making it as Node Key >>could be multiple doctors with same lastName?
-            ///--toReview** could make speciality part of key?!?
-            ///
+            ///--could make speciality part of key?!? >>yup better
+            ///umm better as Unique actually?
             var query = @"CREATE CONSTRAINT doctor_unique IF NOT EXISTS
-            FOR (n:Doctor) REQUIRE (n.lastName, n.id) IS NODE KEY"; 
+            FOR (n:Doctor) REQUIRE (n.lastName, n.id) IS NODE KEY"; //todo** add speciality**
 
-            _logger.LogInformation("Creating DoctorNodeConstraint");
+            _logger.LogInformation("Creating DoctorNodeConstraints");
         
             await _neo4jDataAccess.ExecuteWriteTransactionAsync(query);
             

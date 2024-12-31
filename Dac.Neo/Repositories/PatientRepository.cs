@@ -79,6 +79,28 @@ namespace Dac.Neo.Repositories;
             return count;
         }
 
+        public async Task<string> CreatePatientRequest(string patientId, string docId, string action, string reason)
+        {
+            var query = @"MATCH (p:Patient) WHERE p.id = $patientId 
+                        MATCH (d:Doctor) WHERE d.id = $docId
+                        WITH p, d
+                        MERGE (p)-[r:REQUESTED {action: $action, reason:$reason, status:'pending', date:timestamp()}]->(d)
+                        RETURN r.status";
+                        //status could be needed--toReview
+
+
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "patientId",patientId },
+                { "docId", docId},
+                { "action",action},
+                { "reason",reason}
+            };
+
+            _logger.LogInformation("CreatePatientRequest {patient}--{action}->{docId}", patientId, action, docId);
+            
+            return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
+        }
+
         /// <summary>
         /// List Patients with minimal information
         /// </summary>

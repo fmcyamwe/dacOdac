@@ -13,6 +13,8 @@ public interface IPatientRepository
     //todo** 
     //updatePatient?
     //addTreatment
+
     //addVisit (by Nurse to add patient's visit (date and seen_by<doctor>)) 
-        
+    Task<string> CreatePatientRequest(string patientId, string doctorId, string action, string reason); 
+    
 }

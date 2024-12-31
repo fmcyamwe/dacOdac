@@ -115,12 +115,24 @@ namespace Dac.Neo.Repositories;
         /// <summary>
         /// Get count of patients in Doctor's care.
         /// </summary>
-        public async Task<long> GetPatientsCount(string id) //todo** should be a list
-        {
+        public async Task<long> GetPatientsCount(string id) 
+        {//todo** should be a list -
+
             //todo** use id and change to query Relationship
             var query = @"Match (d:Doctor) RETURN count(d) as patientCount";
             var count = await _neo4jDataAccess.ExecuteReadScalarAsync<long>(query);
             return count;
+        }
+
+        public async Task<List<Dictionary<string, object>>> GetPendingRequests(string id)
+        {
+            var query = @"MATCH p=(d:Doctor)<-[r:REQUESTED {status: 'pending'}]-(a:Patient)
+                        WHERE d.id = $docId
+                        RETURN r{patientId:a.id, action:r.action, reason:r.reason, on:r.date}";
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "docId", id }  
+            };
+            return await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "r", parameters);
         }
 
         /// <summary>
@@ -161,5 +173,26 @@ namespace Dac.Neo.Repositories;
 
             return doc;
         }
-        
+
+        public async Task<string> AddPatientTreatment(string docId,string patientId, string name, string details)
+        {
+            //todo** validation & check r.to is not null for Treatment updates
+
+            //if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName))
+            //{
+            var query = @"MATCH (p:Patient) WHERE p.id = $patientId
+                    MATCH (d:Doctor) WHERE d.id = $docId
+                    WITH p, d
+                    MERGE (p)-[r:HAS_TREATMENT {from: timestamp()}]->(t:Treatment {by: d.id, name:$name, details:$details})
+                    RETURN t.by";
+                
+            IDictionary<string, object> parameters = new Dictionary<string, object> 
+            {
+                { "patientId",patientId},
+                { "docId", docId},
+                { "name", name},
+                { "details", details}            
+            };
+            return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
+        }
     }

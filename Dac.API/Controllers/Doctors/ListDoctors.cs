@@ -28,7 +28,7 @@ public class ListDoctors : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Ok<List<Dictionary<string, object>>>> GetAllDoctors()
+    public async Task<Ok<List<Dictionary<string, object>>>> GetAllDoctors()//todo add pagination >> [AsParameters] PaginationRequest paginationRequest
     {
         
         var p = await _apiService.GetAllDoctors();

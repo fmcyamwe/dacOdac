@@ -10,9 +10,10 @@ namespace Dac.Neo.Repositories;
         Task<string> AddDoctor(DoctorDB doc); 
 
         Task<DoctorDB> FetchDoctorByID(string id); //requiere auth!
-        //todo** 
-        //addPatientTreatment
-        //addMedicalRecord
+       
+        Task<string> AddPatientTreatment(string docId,string patientId, string name, string details);
+        
+        Task<List<Dictionary<string, object>>> GetPendingRequests(string id);
 
         Task<long> GetPatientsCount(string id); //redundant as could use below--testing** for now
         Task<List<Dictionary<string, object>>> GetAllPatients(string id); //all patients of doctor

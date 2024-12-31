@@ -39,7 +39,13 @@ public class ApiManagerService : IApiManagerService
 
     public async Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName)
     {
-        return await _patientRepository.SearchPatientByFullName(firstName, lastName); //todo** check for null
+        return await _patientRepository.SearchPatientByFullName(firstName, lastName);
+    }
+
+    public async Task<string> CreatePatientRequest(string patientId, VisitRequest v)
+    {
+        return await _patientRepository.CreatePatientRequest(patientId, v.DoctorId, v.Action, v.Reason);
+
     }
 
     public async Task<List<Dictionary<string, object>>> GetAllDoctors()
@@ -77,5 +83,10 @@ public class ApiManagerService : IApiManagerService
     public async Task<long> GetPatientsCount(string id)
     {
         return await _doctorRepository.GetPatientsCount(id);
+    }
+
+    public async Task<List<Dictionary<string, object>>> GetPatientRequests(string id) //PendingRequests
+    {
+        return await _doctorRepository.GetPendingRequests(id);
     }
 }
