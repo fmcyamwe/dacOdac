@@ -32,7 +32,8 @@ public class DoctorController : BaseController //ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous] //authorization
-    //[Authorize] //same as above...toTest* when enabled >> limit access to authenticated users for that controller or action.
+    [Authorize] //toTest* when enabled >> limit access to authenticated users for that controller or action.
+    //[Authorize(Roles = "Admin")]  // Accessible only to Admin role
     public async Task<Ok<long>> GetDoctorPatientsCount([FromRoute] string id)
     {
         //not to be confused with >> GET doctors/{id}/patients/     (retrieves all patients)--todo** 

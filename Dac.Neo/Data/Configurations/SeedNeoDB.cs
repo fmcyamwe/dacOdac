@@ -26,18 +26,17 @@ public interface ISeeder
         {
             _neo4jDataAccess = neo4jDataAccess;
             _logger = logger;
-            Console.WriteLine("in Seeder!! OYEEE!");
         }
 
-        public Seeder(){
+        /*public Seeder(){
                     
             var e =  AlreadyPopulated();
-            _logger.LogInformation("huh here? {e}",e); 
-            Console.WriteLine("in Seeder::Seeder!! OYEEE!");
-            //toSee if can initialize stuff here during registration?
+            _logger.LogInformation("Seeder::huh here in Seeder? {e}",e); 
+            Console.WriteLine("in Seeder::Seeder!! OYEEE! OYEEE");
+            //could initialize stuff here during registration?
             
             return;
-        }
+        }*/
 
         /// <summary>
         /// Check if Graph database is already populated.
@@ -57,16 +56,21 @@ public interface ISeeder
         /// </summary>
         public async Task CreatePatientNodeConstraints()
         {
-            var query = @"CREATE CONSTRAINT patient_unique IF NOT EXISTS 
-            FOR (n:Patient) REQUIRE (n.firstName, n.lastName) IS UNIQUE"; //could also make it as Node Key
+            //no need for both to be present
+            //using pre-normalized names as indexes instead of (n.firstName, n.lastName)
+            //upperFirstName == firstName
+            //upperLastName ==  lastName
+            var query = @"CREATE CONSTRAINT patient_unique_names IF NOT EXISTS 
+            FOR (n:Patient) 
+            REQUIRE (n.upperFirstName, n.upperLastName) IS UNIQUE"; 
 
             _logger.LogInformation("Creating NameConstraint");
             
             await _neo4jDataAccess.ExecuteWriteTransactionAsync(query);
 
             //also add constraint on id property
-            var patient = @"CREATE CONSTRAINT patient_node_id IF NOT EXISTS
-            FOR (n:Patient) REQUIRE (n.id) IS NODE KEY"; 
+            var patient = @"CREATE CONSTRAINT patient_node_key IF NOT EXISTS
+            FOR (n:Patient) REQUIRE (n.id) IS NODE KEY"; //IS UNIQUE 
 
             await _neo4jDataAccess.ExecuteWriteTransactionAsync(patient);
             return;
@@ -78,10 +82,12 @@ public interface ISeeder
         public async Task CreateDoctorNodeConstraints()
         {
             ////making it as Node Key >>could be multiple doctors with same lastName?
-            ///--could make speciality part of key?!? >>yup better
-            ///umm better as Unique actually?
-            var query = @"CREATE CONSTRAINT doctor_unique IF NOT EXISTS
-            FOR (n:Doctor) REQUIRE (n.lastName, n.id) IS NODE KEY"; //todo** add speciality**
+            ///--making it possible via different speciality
+            ///--could make speciality part of key?!? >>yup better speciality
+            ///umm better as Unique actually? meh better added as part of node key
+            ///upperLastName == lastName
+            var query = @"CREATE CONSTRAINT doctor_node_key IF NOT EXISTS
+            FOR (n:Doctor) REQUIRE (n.upperLastName, n.speciality, n.id) IS NODE KEY"; 
 
             _logger.LogInformation("Creating DoctorNodeConstraints");
         

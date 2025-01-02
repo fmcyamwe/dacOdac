@@ -8,13 +8,18 @@ public class ApiManagerService : IApiManagerService
     private readonly IPatientRepository _patientRepository;
     private readonly IDoctorRepository _doctorRepository;
 
-     private ILogger<ApiManagerService> _logger;
+    private ILogger<ApiManagerService> _logger;
 
     public ApiManagerService(IPatientRepository patientRepo, IDoctorRepository doctorRepo,  ILogger<ApiManagerService> logger)  
     {
         _patientRepository = patientRepo;
         _doctorRepository = doctorRepo;
         _logger = logger;
+    }
+
+    public ILogger<ApiManagerService> GetLogger()
+    {
+        return _logger;
     }
 
     public async Task<long> GetPatientCount()

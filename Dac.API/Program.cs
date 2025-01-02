@@ -6,8 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 
 builder.AddApplicationServices(); //setup Neo4J
@@ -42,7 +40,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); //toTest changing in docker
+        
     });
+
 }
 
 //app.AddControllers(); //Yeeeyuh worked :) but not needed
@@ -50,15 +50,16 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseCors(CORS_POLICY);
 
-//app.UseAuthorization(); //toTest* and has to be between useRouting & mapControllers
+app.UseAuthorization(); //toTest* and has to be between useRouting & mapControllers
 
+//endpoints.MapApiV1()
 app.MapControllers().WithOpenApi(); //withOpenApi?
 
 app.UseStatusCodePages(); //toTest if should use?!? 
 app.MapDefaultControllerRoute();
 
 //app.UseHttpsRedirection();
-app.UseAuthentication();
+//app.UseAuthentication(); //huh was cause not able to auth on endpoints like GetAllPatients() >>todo** enable later
 
 //app.UseAntiforgery(); //toUse** with POST endpoints >> need to invoke AddAntiforgery() in services.... >>Nope still bork on Post
 

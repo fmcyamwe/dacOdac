@@ -21,14 +21,51 @@ namespace Dac.Neo.Repositories;
         }
 
         /// <summary>
+        /// Add a doctor
+        /// </summary>
+        public async Task<string> AddDoctor(DoctorDB doctor)
+        {
+            if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName)) // todo** add Speciality
+            {
+                
+                //var query = @"MERGE (d:Doctor {lastName: $lastName, speciality: $speciality})
+                //            ON CREATE SET d.id = $id, d.firstName = $firstName, d.practiseSince = $practiseSince
+                //            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
+                
+                var query = @"MATCH (d:Doctor) WHERE d.upperLastName = toUpper($lastName) AND d.speciality = $speciality
+                            WITH d
+                            MERGE (d)
+                            ON CREATE SET d.id = $id, d.firstName = $firstName, d.lastName = $lastName, d.practiseSince = $practiseSince
+                            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
+                            
+                IDictionary<string, object> parameters = new Dictionary<string, object> 
+                { 
+                    { "lastName", doctor.LastName },
+                    { "firstName", doctor.FirstName?.Trim() ?? "Dr"}, //default to 'Dr'
+                    { "speciality", doctor.Speciality ?? ""},
+                    { "id", doctor.Id ?? ""}, //Guid.NewGuid().ToString()[^12..]}, //robust than Neo4J's ID(p) //saving last part >> NewGuid.ToString()[^12..]
+                    { "practiseSince", doctor.PractiseSince ?? DateTime.Now}
+                    
+                };
+                return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
+            }
+            else
+            {
+                throw new System.ArgumentNullException(nameof(doctor), "Doctor must not be null");
+            }
+        }
+
+        /// <summary>
         /// Searches Doctor by lastName
         /// </summary>
-        public async Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName)
+        public async Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName) //add speciality?? todo**
         {
-            var query = @"MATCH (d:Doctor) WHERE toUpper(d.lastName) CONTAINS toUpper($searchString) 
+            //d.upperLastName = toUpper($lastName)
+            //toUpper(d.lastName) CONTAINS toUpper($searchString)
+            var query = @"MATCH (d:Doctor) WHERE d.upperLastName CONTAINS toUpper($lastName) 
                             RETURN d{Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: COALESCE(d.speciality, '') } ORDER BY d.lastName LIMIT 5";
 
-            IDictionary<string, object> parameters = new Dictionary<string, object> { { "searchString", lastName } };
+            IDictionary<string, object> parameters = new Dictionary<string, object> { { "lastName", lastName } };
 
             var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d", parameters);
 
@@ -84,34 +121,7 @@ namespace Dac.Neo.Repositories;
             return doctors;
         }
 
-        /// <summary>
-        /// Add a doctor
-        /// </summary>
-        public async Task<string> AddDoctor(DoctorDB doctor)
-        {
-            if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName))
-            {
-                
-                var query = @"MERGE (d:Doctor {lastName: $lastName, speciality: $speciality})
-                            ON CREATE SET d.id = $id, d.firstName = $firstName, d.practiseSince = $practiseSince
-                            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
-                IDictionary<string, object> parameters = new Dictionary<string, object> 
-                { 
-                    { "lastName", doctor.LastName },
-                    { "firstName", doctor.FirstName?.Trim() ?? "Dr"}, //default to 'Dr'
-                    { "speciality", doctor.Speciality ?? ""}, //toReview** if shouldnt be requiered
-                    { "id", Guid.NewGuid().ToString()[^12..]}, //robust than Neo4J's ID(p) //saving last part >> NewGuid.ToString()[^12..]
-                    { "practiseSince", doctor.PractiseSince ?? DateTime.Now}
-                    
-                };
-                return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
-            }
-            else
-            {
-                throw new System.ArgumentNullException(nameof(doctor), "Doctor must not be null");
-            }
-        }
-
+        
         /// <summary>
         /// Get count of patients in Doctor's care.
         /// </summary>

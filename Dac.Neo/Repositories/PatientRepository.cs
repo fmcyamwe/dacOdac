@@ -26,8 +26,11 @@ namespace Dac.Neo.Repositories;
         /// </summary>
         public async Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName)
         {
-            var query = @"MATCH (p:Patient) WHERE (toUpper(p.firstName) = toUpper($first) AND toUpper(p.lastName) = toUpper($last))
-                                RETURN p{Id: p.id, firstName: p.firstName, lastName: p.lastName} ORDER BY p.firstName LIMIT 5";
+            //var query = @"MATCH (p:Patient) WHERE (toUpper(p.firstName) = toUpper($first) AND toUpper(p.lastName) = toUpper($last))
+            //                   RETURN p{Id: p.id, firstName: p.firstName, lastName: p.lastName} ORDER BY p.firstName LIMIT 5";
+            
+            var query = @"MATCH (p:Patient) WHERE (p.upperFirstName CONTAINS toUpper($first) OR p.upperLastName CONTAINS toUpper($last))
+                         RETURN p{Id: p.id, firstName: p.firstName, lastName: p.lastName} ORDER BY p.firstName LIMIT 5";
 
             IDictionary<string, object> parameters = new Dictionary<string, object> { { "first", firstName },{ "last", lastName } };
 
@@ -46,17 +49,25 @@ namespace Dac.Neo.Repositories;
         {
             if (person != null && !string.IsNullOrWhiteSpace(person.FirstName) && !string.IsNullOrWhiteSpace(person.LastName))
             {
-                Console.WriteLine("AddPatient {0} {1}", person.FirstName, person.LastName);
+                Console.WriteLine("AddPatient {0} {1} >> {2}", person.FirstName, person.LastName, person.Id);
 
-                var query = @"MERGE (p:Patient {firstName: $firstName, lastName: $lastName})
-                            ON CREATE SET p.id = $id, p.born = $born, p.gender = $gender
-                            ON MATCH SET p.born = $born, p.updatedAt = timestamp() RETURN p.id";
+                //@"MERGE (p:Patient {firstName: $firstName, lastName: $lastName})
+                var query = @"MATCH (p:Patient) 
+                            WHERE (p.upperFirstName = toUpper($firstName) AND p.upperLastName = toUpper($lastName))
+                            WITH p
+                            MERGE (p)
+                            ON CREATE SET p.firstName = $firstName, p.lastName = $lastName, p.id = $id, p.born = $born, p.gender = $gender
+                            ON MATCH SET p.born = $born, p.updatedAt = timestamp() RETURN p.id"; 
+                        
+                        //todo** match should update name too?
+                        //todo** Id should not be empty?
+                
                 IDictionary<string, object> parameters = new Dictionary<string, object> 
                 { 
                     { "firstName", person.FirstName },
                     { "lastName", person.LastName },
                     { "born", person.Born ?? 0 },
-                    { "id", Guid.NewGuid().ToString()[^12..] }, //more robust than Neo4J's ID(p) //only saving last part
+                    { "id", person.Id ?? ""}, //Guid.NewGuid().ToString()[^12..] }, //more robust than Neo4J's ID(p) //only saving last part
                     { "gender", person.Gender ?? ""},
                     //todo** add other props and update in query
                 };

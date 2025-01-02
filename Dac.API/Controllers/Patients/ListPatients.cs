@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults; 
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 using Dac.API.Services;
@@ -26,6 +27,9 @@ public class ListPatients : BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
+    //[Authorize]
+    [Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
+    //--seem needed as default authorize above fails :( ..or should just set Roles = "" ? toTry**
     public async Task<Ok<List<Dictionary<string, object>>>> GetAllPatients() //List<Patient>  //IResult //Task<ActionResult<bool>>
     {
         

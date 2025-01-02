@@ -5,7 +5,7 @@ namespace Dac.API.Model;
 
 public class Mapper   //mapping from Neo4J to API models
 {
-    public static Patient MapToPatient(PatientDB entity)
+    public static Patient MapToPatient(PatientDB entity) //rename >> MapFromPatientNode
     {
         return new Patient
         {
@@ -18,11 +18,11 @@ public class Mapper   //mapping from Neo4J to API models
         };
     }
 
-    public static PatientDB MapToPatientDB(Patient p)
+    public static PatientDB MapToPatientDB(Patient p) //rename?  MapToPatientNode
     {
         return new PatientDB
         {
-            Id =  p.Id ?? "", //umm should use Guid here? >> toReview**
+            Id =  p.Id ?? Guid.NewGuid().ToString()[^12..] , //p.Id ?? "", //umm should use Guid here? >> toReview**
             FirstName = p.FirstName,
             LastName = p.LastName,
             Born = p.Born,
@@ -32,7 +32,7 @@ public class Mapper   //mapping from Neo4J to API models
 
     }
 
-    public static Doctor MapToDoctor(DoctorDB entity)
+    public static Doctor MapToDoctor(DoctorDB entity) //todo MapFromDoctorNode
     {
         return new Doctor
         {
@@ -44,12 +44,12 @@ public class Mapper   //mapping from Neo4J to API models
         };
     }
 
-    public static DoctorDB MapToDoctorDB(Doctor d)
+    public static DoctorDB MapToDoctorDB(Doctor d)  //rename >> MapToDoctorNode 
     {
         return new DoctorDB
         {
-            Id = d.Id,
-            FirstName = d.FirstName,
+            Id = d.Id ?? Guid.NewGuid().ToString()[^12..],
+            FirstName = d.FirstName ?? "Dr.", //default to 'Dr.'
             LastName = d.LastName,
             Speciality = d.Speciality ?? "", //should not be null --toTest**
             //FormattedCreatedAt = entity.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")

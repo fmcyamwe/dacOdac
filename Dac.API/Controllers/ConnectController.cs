@@ -2,11 +2,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+
+
+using Microsoft.IdentityModel.Tokens;
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
 using Microsoft.AspNetCore.Http.HttpResults; 
 
-
 using Dac.API.Services;
+using Dac.API.Constants;
+using Dac.API.Extensions;
 
 namespace Dac.API.Controllers;
 
@@ -59,6 +67,50 @@ public class ConnectController : BaseController
         
         return TypedResults.Ok(hardcodedArray.ToList());
     }
+
+    [Route("auth/login")] //api/[controller]
+    [HttpPost]
+    [ExcludeFromDescription]
+    public IActionResult Login([FromBody] LoginRequest request)//IActionResult  //Results<Ok<string>, Not>
+    {//Task<Results<NoContent, NotFound>>
+        // Dummy validation for demonstration purposes
+        if (request.Username == "admin" && request.Password == "password")
+        {
+            // Generate JWT token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(AuthorizationConstants.JWT_SECRET_KEY); //"your-secret-key"
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    //new Claim(ClaimTypes.Name, request.Username), //umm needed?!? or gets those nulls in token<SecurityToken> ?
+                    new Claim(ClaimTypes.Role, "admin") // Assign roles
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = "your-issuer",
+                Audience = "your-audience",
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            //_apiService.GetLogger().LogInformation("ConnectController :: {validTo} -> {toString} -> {toJson} ", token.ValidTo, token.ToString(), token.ToJson<SecurityToken>());
+            
+            return Ok(new { Token = tokenString });
+            //return Results.Ok(tokenString);//TypedResults.Ok(tokenString); //
+            //a JWT token that should be used in the  Authorization header >i.e Authorization: Bearer <token>
+        }
+
+        return Unauthorized();//TypedResults.NoContent;
+    }
+}
+
+public class LoginRequest
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
 }
 /*
 Pediatrician

@@ -5,6 +5,7 @@ namespace Dac.API.Services;
 public interface IApiManagerService
 {
     //string ExtractRedirectUriFromReturnUrl(string url);
+    ILogger<ApiManagerService> GetLogger();
     
     /////Patient/////
     Task<long> GetPatientCount(); //for testing---toRemove
