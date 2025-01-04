@@ -65,34 +65,6 @@ public class PatientController : BaseController  //ControllerBase
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
 
-
-    //GET patients/{id}/treatments
-    [Route("{id}/treatments")]
-    [HttpGet]
-    [Tags("Patients")]
-    [EndpointSummary("Patient treatments")]
-    [EndpointDescription("Get a patient's treatments")]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public Task<IResult> GetPatientTreatments([FromRoute] string id)
-    {
-        return (Task<IResult>)Results.Ok(true); //todo**
-    }
-
-    //POST patients/{id}/treatments
-    [Route("{id}/treatments")]
-    [HttpPost]
-    [Tags("Patients")]
-    [EndpointSummary("Add Patient treatment")]
-    [EndpointDescription("Add a new treatment for a patient")]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public Task<IResult> AddPatientTreatment([FromRoute] string id) //toAdd** [FromBody] Treatment treatment
-    {
-        return (Task<IResult>)Results.Ok(true); //todo**
-    }
-
     //POST patients/{id}/requests
     [Route("{id}/requests")]
     [HttpPost]
@@ -102,7 +74,7 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Ok<string>> CreateRequest([FromRoute] string id,[FromBody] VisitRequest request)  //Task<IResult> 
+    public async Task<Ok<string>> CreateRequest([FromRoute] string id,[FromBody] PatientRequest request)  //Task<IResult> 
     {
         var c = await _apiService.CreatePatientRequest(id, request);
         return TypedResults.Ok(c); //Results.Ok(true); //Task<IResult> 

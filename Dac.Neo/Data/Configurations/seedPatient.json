@@ -1,0 +1,16 @@
+[
+  {
+    "Id": 1,
+    "FirstName": "Fred",
+    "LastName": "Gars",
+    "Gender":"male",
+    "Born": 1980
+  },
+  {
+    "Id": 2,
+    "FirstName": "Florent",
+    "LastName": "Muyango",
+    "Gender":"male",
+    "Born": 1990
+  }
+]

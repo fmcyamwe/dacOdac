@@ -13,7 +13,7 @@ namespace Dac.API.Controllers.Patients;
 
 //[Route("patients")]
 //[ApiController]
-public class UpdatePatient :  BaseController // ControllerBase
+public class UpdatePatient : BaseController // ControllerBase
 {
     public UpdatePatient(IApiManagerService apiService) : base(apiService)
     {}
@@ -27,9 +27,33 @@ public class UpdatePatient :  BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<IResult> UpdateAPatient([FromRoute] string id) //[FromBody] Patient patient
+    public async Task<IResult> UpdateAPatient([FromRoute] string id, [FromBody] Patient patient)
     {
-        return await (Task<IResult>)Results.Ok(true); //todo**
+        if (patient == null)
+        {
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Malformed request :("
+            });
+        }
+
+        try
+        {
+            var p = await _apiService.FetchPatientByID(id);
+            p.FirstName = patient.FirstName;
+            p.LastName = patient.LastName;
+            p.Born = patient.Born;
+            p.Gender = patient.Gender;
+
+            await _apiService.AddPatient(p); //kinda cheating--toFix**
+
+            return Results.NoContent();
+        }catch (Exception ex){
+            Console.WriteLine("UpdateAPatient::ERROR {0}", ex);
+            return TypedResults.NotFound();
+        }
+        
+
+       // return await (Task<IResult>)Results.Ok(true); //todo**
     }
     
 }

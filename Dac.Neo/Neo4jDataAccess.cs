@@ -111,6 +111,10 @@ namespace Dac.Neo;
                         var d = (await _session.RunReadTransactionForObjects<DoctorDB>(query, parameters, returnObjectKey)).Single();
                         _logger.LogInformation("ExecuteReadScalarToModelAsync {d}",d);
                         return d.As<T>();
+                    case "t":
+                        var t = (await _session.RunReadTransactionForObjects<Treatment>(query, parameters, returnObjectKey)).FirstOrDefault(); //prolly only first? toReview**
+                        _logger.LogInformation("ExecuteReadScalarToModelAsync {d}",t);
+                        return t.As<T>();
                     default:
                         _logger.LogInformation("ExecuteReadScalarToModelAsync:: ERROR unknown returnObjectKey {returnObjectKey}",returnObjectKey);
                         return default(T); //bon to see...

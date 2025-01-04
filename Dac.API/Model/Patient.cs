@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using Dac.Neo.Data.Model;
+
 namespace Dac.API.Model; 
 public class Patient
 {
@@ -32,12 +34,13 @@ public class Patient
     //emergency_contact (can access medical history too)
     public string? Gender { get; set;} //string or someting smaller like rune? >>ENUM!!! https://ardalis.com/enum-alternatives-in-c/
 
-    //current doctor? >>nah can just query...prolly? toReview**
+    public Doctor[]? AttendingDoctors { get; set;} //current doctor //could be multiple?
+
+    //[JsonIgnore] //Name = "treatment")]
+    public Treatment? CurrentTreatment { get; set;} 
 
 /* //todo** re-enable below
-    [JsonIgnore] //Name = "treatment")]
-    public Treatment? CurrentTreatment { get; set;} //umm shouldnt this be actually an ID?!? toReview**
-
+   
     [JsonIgnore]
     [Neo4jProperty(Ignore = true)]
     public List<Treatment>? MedicalHistory { get; set; }//DEF need auth** //only viewable & editable by doctor

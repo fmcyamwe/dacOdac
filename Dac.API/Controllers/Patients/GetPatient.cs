@@ -37,7 +37,7 @@ public class GetPatient : BaseController // ControllerBase
             }); //(Task<IResult>)Results.BadRequest();
         }
 
-        var p = await _apiService.FetchPatientByID(id);
+        var p = await _apiService.FetchPatientByID(id); //todo** catch any exception here!
         return TypedResults.Ok(p); 
         //(Task<IResult>)Results.Ok();
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
@@ -46,6 +46,7 @@ public class GetPatient : BaseController // ControllerBase
     // GET patients/count
     [Route("patients/count")]
     [HttpGet]
+    [Tags("Patients")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous] //authorization

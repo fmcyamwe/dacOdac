@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Dac.Neo.Model; 
+
 using Dac.Neo.Data.Model;
 //using Neo4j.Driver;
 
@@ -7,9 +7,9 @@ namespace Dac.Neo.Repositories;
     
     public class DoctorRepository : IDoctorRepository
     {
-        private INeo4jDataAccess _neo4jDataAccess;
+        private readonly INeo4jDataAccess _neo4jDataAccess;
 
-        private ILogger<DoctorRepository> _logger;
+        private readonly ILogger<DoctorRepository> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DoctorRepository"/> class.
@@ -25,16 +25,14 @@ namespace Dac.Neo.Repositories;
         /// </summary>
         public async Task<string> AddDoctor(DoctorDB doctor)
         {
-            if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName)) // todo** add Speciality
+            if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName) && !string.IsNullOrWhiteSpace(doctor.Speciality))
             {
                 
                 //var query = @"MERGE (d:Doctor {lastName: $lastName, speciality: $speciality})
                 //            ON CREATE SET d.id = $id, d.firstName = $firstName, d.practiseSince = $practiseSince
                 //            ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
-                
-                var query = @"MATCH (d:Doctor) WHERE d.upperLastName = toUpper($lastName) AND d.speciality = $speciality
-                            WITH d
-                            MERGE (d)
+                //WHERE d.upperLastName = toUpper($lastName) AND d.speciality = $speciality
+                var query = @"MERGE (d:Doctor {upperLastName: toUpper($lastName), speciality: $speciality})
                             ON CREATE SET d.id = $id, d.firstName = $firstName, d.lastName = $lastName, d.practiseSince = $practiseSince
                             ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
                             
@@ -63,7 +61,7 @@ namespace Dac.Neo.Repositories;
             //d.upperLastName = toUpper($lastName)
             //toUpper(d.lastName) CONTAINS toUpper($searchString)
             var query = @"MATCH (d:Doctor) WHERE d.upperLastName CONTAINS toUpper($lastName) 
-                            RETURN d{Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: COALESCE(d.speciality, '') } ORDER BY d.lastName LIMIT 5";
+                        RETURN d{Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: COALESCE(d.speciality, '') } ORDER BY d.lastName LIMIT 5";
 
             IDictionary<string, object> parameters = new Dictionary<string, object> { { "lastName", lastName } };
 
@@ -97,7 +95,7 @@ namespace Dac.Neo.Repositories;
         public async Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality()
         {
             //def gotta run this b4 hand!   
-            var query = @"MATCH (d:Doctor) WITH d RETURN distinct d.speciality, count(d) "; //ORDER BY d.speciality 
+            var query = @"MATCH (d:Doctor) WITH d RETURN distinct d.speciality, count(d)"; //ORDER BY d.speciality 
 
             //IDictionary<string, object> parameters = new Dictionary<string, object> { { "searchString", speciality } };
 
@@ -122,7 +120,7 @@ namespace Dac.Neo.Repositories;
         }
 
         
-        /// <summary>
+        /*/// <summary>
         /// Get count of patients in Doctor's care.
         /// </summary>
         public async Task<long> GetPatientsCount(string id) 
@@ -132,7 +130,7 @@ namespace Dac.Neo.Repositories;
             var query = @"Match (d:Doctor) RETURN count(d) as patientCount";
             var count = await _neo4jDataAccess.ExecuteReadScalarAsync<long>(query);
             return count;
-        }
+        }*/
 
         public async Task<List<Dictionary<string, object>>> GetPendingRequests(string id)
         {
@@ -145,13 +143,41 @@ namespace Dac.Neo.Repositories;
             return await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "r", parameters);
         }
 
+        public async Task<string> UpdatePatientRequest(string id, string action, string newStatus)
+        {
+            
+            var query = @"MATCH p=(d:Doctor)<-[r:REQUESTED {status: 'pending', action: $action}]-(a:Patient)
+                        WHERE d.id = $docId SET r.status= $newStatus, r.updatedAt = timestamp()
+                        RETURN a.id"; //r.status //r{patientId:a.id, action:r.action, reason:r.reason, on:r.date}
+                        //
+                        //todo* use CASE to make into single query...
+            
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "docId", id },
+                { "action", action},
+                { "newStatus", newStatus},
+            };
+
+            return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
+        }
+
         /// <summary>
         /// Get all patients treated by Doctor
         /// </summary>
-        public Task<List<Dictionary<string, object>>> GetAllPatients(string id)
+        public async Task<List<Dictionary<string, object>>> GetAllPatients(string id)
         {
-            //todo** use id and change to query Relationship
-            return Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
+            // toREview** AND r.from is not null
+            //also just get the current patients--(not historical patients)--toReview**
+            var query = @"MATCH (d:Doctor {id: $docId})
+                        OPTIONAL MATCH (d)<-[r:PATIENT_OF]-(p:Patient) WHERE r.to IS NULL
+                        RETURN p{patientId: p.id, patientName: p.firstName+' '+p.lastName, since: r.since, fromAction: r.fromAction}";
+
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "docId", id }  
+            };
+
+            return await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "p", parameters);
+            //Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
         }
 
         public async Task<DoctorDB> FetchDoctorByID(string id)
@@ -188,13 +214,11 @@ namespace Dac.Neo.Repositories;
         {
             //todo** validation & check r.to is not null for Treatment updates
 
-            //if (doctor != null && !string.IsNullOrWhiteSpace(doctor.LastName))
-            //{
             var query = @"MATCH (p:Patient) WHERE p.id = $patientId
-                    MATCH (d:Doctor) WHERE d.id = $docId
-                    WITH p, d
-                    MERGE (p)-[r:HAS_TREATMENT {from: timestamp()}]->(t:Treatment {by: d.id, name:$name, details:$details})
-                    RETURN t.by";
+                        MATCH (d:Doctor) WHERE d.id = $docId
+                        WITH p, d
+                        MERGE (p)-[r:HAS_TREATMENT {from: timestamp()}]->(t:Treatment {by: d.id, name:$name, details:$details, startDate:timestamp()})
+                        RETURN t.by";
                 
             IDictionary<string, object> parameters = new Dictionary<string, object> 
             {

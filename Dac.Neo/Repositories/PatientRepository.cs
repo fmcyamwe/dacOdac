@@ -1,16 +1,16 @@
 using Microsoft.Extensions.Logging;
-using Dac.Neo.Model; 
-using Dac.Neo.Data;
+
 using Dac.Neo.Data.Model;
+
 //using Neo4j.Driver;
 
 namespace Dac.Neo.Repositories;
     
     public class PatientRepository : IPatientRepository
     {
-        private INeo4jDataAccess _neo4jDataAccess;
+        private readonly INeo4jDataAccess _neo4jDataAccess;
 
-        private ILogger<PatientRepository> _logger;
+        private readonly ILogger<PatientRepository> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PatientRepository"/> class.
@@ -48,16 +48,14 @@ namespace Dac.Neo.Repositories;
         public async Task<string> AddPatient(PatientDB person)
         {
             if (person != null && !string.IsNullOrWhiteSpace(person.FirstName) && !string.IsNullOrWhiteSpace(person.LastName))
-            {
+            {//todo** should remove this check with constraints change....
+
                 Console.WriteLine("AddPatient {0} {1} >> {2}", person.FirstName, person.LastName, person.Id);
 
-                //@"MERGE (p:Patient {firstName: $firstName, lastName: $lastName})
-                var query = @"MATCH (p:Patient) 
-                            WHERE (p.upperFirstName = toUpper($firstName) AND p.upperLastName = toUpper($lastName))
-                            WITH p
-                            MERGE (p)
+                var query = @"MERGE (p:Patient {upperFirstName: toUpper($firstName), upperLastName: toUpper($lastName)})
                             ON CREATE SET p.firstName = $firstName, p.lastName = $lastName, p.id = $id, p.born = $born, p.gender = $gender
-                            ON MATCH SET p.born = $born, p.updatedAt = timestamp() RETURN p.id"; 
+                            ON MATCH SET p.born = $born, p.gender = $gender, p.updatedAt = timestamp()
+                            RETURN p.id"; 
                         
                         //todo** match should update name too?
                         //todo** Id should not be empty?
@@ -133,7 +131,7 @@ namespace Dac.Neo.Repositories;
         /// </summary>
         public async Task<PatientDB> FetchPatientByID(string id)
         {
-            var query = @"Match (p:Patient {id: $id}) RETURN p";
+            var query = @"Match (p:Patient {id: $id}) RETURN p"; 
                         //RETURN p{ Id: p.id, FirstName: p.firstName, LastName: p.lastName, Born: COALESCE(p.born, 0), Gender: COALESCE(p.gender, '') }";
                         //toSee...with above...think just had to upper case return?!? or cause of empty properties? >> nope bork as casting from INode smh
                         //also cast born to int? meh no need toInteger()
@@ -149,9 +147,9 @@ namespace Dac.Neo.Repositories;
             //or just use Neo4J Extension package? >>tryin...(aint looking good >>gotta add lower Driver version...coliiiis)
 
             //OR use <object> and cast/build into Patient here? >>first try was half successful at least--toTry** if Extension dont work
-            _logger.LogInformation("FetchPatientByID {patient} >>type {type}", patient,patient.GetType());
-            //Console.WriteLine("FetchPatientByID {0} >>type {1}", patient, patient.GetType()); //toSee
-            //_logger.LogInformation("ExecuteReadScalarAsync {}", typeof(T));
+            _logger.LogInformation("FetchPatientByID {patient}", patient); //>>type {type} //patient.GetType()
+            
+            //todo** catch exception when not found and return null
             /*try
             {
                 var p = patient.As<Patient>(); //bon to see >>nope still borks BUT does bring object back!!
@@ -163,5 +161,66 @@ namespace Dac.Neo.Repositories;
             //return patient.As<Patient>();
             //return patient;//.As<Patient>();
             return patient;
+        }
+        
+        public async Task<List<Dictionary<string, object>>> PatientAttendingDoctors(string id)
+        {
+            var query = @"MATCH (p:Patient {id: $id})
+                        OPTIONAL MATCH (p)-[r:PATIENT_OF]->(d:Doctor) WHERE r.to IS NULL
+                        RETURN p{doctorId: d.id, doctorName: d.firstName+' '+d.lastName, speciality: d.speciality, since: r.since, fromAction: r.fromAction }";
+                        //could just return d, r  smh
+            
+            IDictionary<string, object> parameters = new Dictionary<string, object> 
+            { 
+                { "id", id },
+            };
+
+            return await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "p", parameters);     
+        }
+
+        public async Task<string> AddAttendingDoctor(string patientId, string docId, string triggerAction)
+        {
+            var query = @"MATCH (p:Patient {id: $patientId})
+                        MATCH (d:Doctor {id: $docId})
+                        MERGE (p)-[r:PATIENT_OF]->(d)
+                        ON CREATE SET r.since = timestamp(), r.fromAction = $action
+                        ON MATCH SET r.fromAction = $action, r.updatedAt = timestamp()
+                        RETURN r.fromAction";//umm match? 
+
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "docId", docId },
+                { "patientId", patientId},
+                { "action", triggerAction},
+            };
+
+            return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
+
+        }
+
+        public async Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id)
+        {
+            //todo**
+            //get all requests
+            //get all Treatments
+            //get all attending doctors
+            //order by date or something....
+            return await Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
+
+        }
+
+        public async Task<Treatment> CurrentPatientTreatment(string id)
+        {
+            var query = @"MATCH (a:Patient {id:$id})-[r:HAS_TREATMENT]->(t:Treatment)
+                        WHERE r.to is null
+                        RETURN t"; 
+                        //WITH t, r ORDER BY r.from LIMIT 1  >>toTest** if should add!!
+                        //RETURN t.name, t.by;
+                        
+            IDictionary<string, object> parameters = new Dictionary<string, object> { 
+                { "id", id }  
+            };
+            
+            //toTest or need manual return?
+            return await _neo4jDataAccess.ExecuteReadScalarToModelAsync<Treatment>(query, "t", parameters); 
         }
     }

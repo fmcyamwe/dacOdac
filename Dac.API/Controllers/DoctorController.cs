@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 
 using Dac.API.Services;
+using Dac.API.Model;
 
 namespace Dac.API.Controllers;
 
@@ -22,43 +23,28 @@ public class DoctorController : BaseController //ControllerBase
         //_apiService = apiService;
     }
 
-
-    // GET doctors/{id}/patients/count
-    [Route("{id}/patients/count")]
+    // GET doctors/{id}/patients
+    [Route("{id}/patients")]
     [HttpGet]
     [Tags("Doctors")]
-    [EndpointSummary("Patient count")]
-    [EndpointDescription("Get how many patients Doctor in charge of")]
+    [EndpointSummary("Doctor's Patients")]
+    [EndpointDescription("Get patients Doctor in charge of")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous] //authorization
     [Authorize] //toTest* when enabled >> limit access to authenticated users for that controller or action.
     //[Authorize(Roles = "Admin")]  // Accessible only to Admin role
-    public async Task<Ok<long>> GetDoctorPatientsCount([FromRoute] string id)
+    public async Task<Ok<List<Dictionary<string, object>>>> GetDoctorPatients([FromRoute] string id)
     {
-        //not to be confused with >> GET doctors/{id}/patients/     (retrieves all patients)--todo** 
+        //not to be confused with >> GET doctors/{id}/patients/   
         
         //TypedResults.Ok(); 
         //todo** use TypedResults<IResult> for ease of unit tests
-        
-        return TypedResults.Ok(await _apiService.GetPatientsCount(id)); //_doctorRepository
+        var res = await _apiService.GetDoctorPatients(id);
+
+        return TypedResults.Ok(res); 
     }
     
-    //Get doctors/speciality
-    [Route("speciality")]
-    [HttpGet]
-    [Tags("Doctors")]
-    [EndpointSummary("Doctors by Speciality")]
-    [EndpointDescription("List Doctors by Speciality")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), 500)]
-    [AllowAnonymous] //authorization
-    public Task<List<Dictionary<string, object>>> FetchDoctorsBySpeciality([FromQuery(Name = "q")] string search)
-    {
-        //todo** check that not malformed?
-        //also  >> NotFound();
-        return _apiService.ListDoctorsBySpeciality(search); //_doctorRepository
-    }
 
     //Get doctors/{id}/requests
     [Route("{id}/requests")]
@@ -74,5 +60,35 @@ public class DoctorController : BaseController //ControllerBase
     public Task<List<Dictionary<string, object>>> FetchDoctorsB([FromRoute] string id)
     {
         return _apiService.GetPatientRequests(id); //async? 
+    }
+
+    [Route("{id}/requests")]
+    [HttpPost]
+    [Tags("Doctors")]
+    [EndpointSummary("Doctor response on Requests")]
+    [EndpointDescription("Response to pending patient's Request")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    //[AllowAnonymous] //authorization
+    public async Task<IResult> UpdatePatientRequest([FromRoute] string id, [FromBody] DoctorActionResponse resp)
+    { //need async for to return Task<IResult> estiiii
+
+        //todo** check that resp.PatientId exist!! 
+        if (resp == null || resp.Action.Length == 0 || resp.Status.Length == 0)
+        {
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Malformed request :("
+            });
+        }
+        //should pass in resp.PatientId ? toSee**
+        var result = await _apiService.UpdatePatientRequest(id,resp.Action,resp.Status);
+
+        //todo** check result
+        _apiService.GetLogger().LogInformation("UpdatePatientRequest :: {patientID} > {result} ", resp.PatientId, result);
+            
+        return Results.NoContent(); //umm 204?
+
     }
 }

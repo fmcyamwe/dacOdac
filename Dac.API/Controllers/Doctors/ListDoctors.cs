@@ -38,5 +38,35 @@ public class ListDoctors : BaseController
         //return (Task<IResult>)Results.Ok(true); 
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
+
+    //Get doctors/speciality
+    [Route("doctors/speciality")]
+    [HttpGet]
+    [Tags("Doctors")]
+    [EndpointSummary("Doctors by Speciality")]
+    [EndpointDescription("List Doctors by Speciality")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    [AllowAnonymous] //authorization
+    public Task<List<Dictionary<string, object>>> FetchDoctorsBySpeciality([FromQuery(Name = "q")] string search)
+    {
+        //todo** check that not malformed?
+        //also  >> NotFound();
+        return _apiService.ListDoctorsBySpeciality(search); //_doctorRepository
+    }
     
+    //Get doctors/speciality
+    [Route("doctors/speciality/count")]
+    [HttpGet]
+    [Tags("Doctors")]
+    [EndpointSummary("Count Doctors by Speciality")]
+    [EndpointDescription("Count of Doctors by Speciality")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    [AllowAnonymous] //authorization
+    public Task<List<Dictionary<string, object>>> CountDoctorsBySpeciality()
+    {
+       
+        return _apiService.DoctorsCountBySpeciality();
+    }
 }

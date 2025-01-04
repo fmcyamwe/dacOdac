@@ -14,16 +14,19 @@ public interface IApiManagerService
     Task<Patient> FetchPatientByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName);
 
-    Task<string> CreatePatientRequest(string patientId, VisitRequest v);
+    Task<string> CreatePatientRequest(string patientId, PatientRequest v);
 
     /////Doctor/////
     Task<List<Dictionary<string, object>>> GetAllDoctors();
-    Task<string> AddDoctor(Doctor doc); 
+    Task<string> AddDoctor(Doctor doc); //auth
     Task<Doctor> FetchDoctorByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);
     Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
     Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality();
-    
-    Task<long> GetPatientsCount(string id); 
     Task<List<Dictionary<string, object>>> GetPatientRequests(string id);
+    Task<List<Dictionary<string, object>>> GetDoctorPatients(string id);
+    Task<string> UpdatePatientRequest(string doctorId, string action, string newStatus);
+
+    Task<string> AddUpdatePatientTreatment(string docId,string patientId, string name, string details);
+
 }

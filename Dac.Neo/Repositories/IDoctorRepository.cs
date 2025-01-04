@@ -14,7 +14,8 @@ namespace Dac.Neo.Repositories;
         Task<string> AddPatientTreatment(string docId,string patientId, string name, string details);
         
         Task<List<Dictionary<string, object>>> GetPendingRequests(string id);
+        Task<string> UpdatePatientRequest(string doctorId, string action, string newStatus);
 
-        Task<long> GetPatientsCount(string id); //redundant as could use below--testing** for now
+        //Task<long> GetPatientsCount(string id); //redundant as could use below--testing** for now
         Task<List<Dictionary<string, object>>> GetAllPatients(string id); //all patients of doctor
     }

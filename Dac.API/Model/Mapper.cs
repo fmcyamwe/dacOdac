@@ -1,11 +1,10 @@
 using Dac.Neo.Data.Model;
-using Dac.Neo.Model;
 
 namespace Dac.API.Model; 
 
 public class Mapper   //mapping from Neo4J to API models
 {
-    public static Patient MapToPatient(PatientDB entity) //rename >> MapFromPatientNode
+    public static Patient MapFromPatientNode(PatientDB entity)
     {
         return new Patient
         {
@@ -18,11 +17,11 @@ public class Mapper   //mapping from Neo4J to API models
         };
     }
 
-    public static PatientDB MapToPatientDB(Patient p) //rename?  MapToPatientNode
+    public static PatientDB MapToPatientNode(Patient p)
     {
         return new PatientDB
         {
-            Id =  p.Id ?? Guid.NewGuid().ToString()[^12..] , //p.Id ?? "", //umm should use Guid here? >> toReview**
+            Id =  p.Id ?? Guid.NewGuid().ToString()[^12..] , //p.Id ?? "", // generate GUIID here
             FirstName = p.FirstName,
             LastName = p.LastName,
             Born = p.Born,
@@ -32,7 +31,7 @@ public class Mapper   //mapping from Neo4J to API models
 
     }
 
-    public static Doctor MapToDoctor(DoctorDB entity) //todo MapFromDoctorNode
+    public static Doctor MapFromDoctorNode(DoctorDB entity)
     {
         return new Doctor
         {
@@ -44,7 +43,7 @@ public class Mapper   //mapping from Neo4J to API models
         };
     }
 
-    public static DoctorDB MapToDoctorDB(Doctor d)  //rename >> MapToDoctorNode 
+    public static DoctorDB MapToDoctorNode(Doctor d)
     {
         return new DoctorDB
         {

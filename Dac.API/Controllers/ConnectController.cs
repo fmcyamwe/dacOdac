@@ -35,8 +35,6 @@ public class ConnectController : BaseController
     //[Authorize] //same as above...toTest* when enabled >> limit access to authenticated users for that controller or action.
     public async Task<Ok<long>> CanConnect() //[FromRoute] string id
     {
-        //not to be confused with >> GET doctors/{id}/patients/     (retrieves all patients)--todo** 
-        
         //TypedResults.Ok(); 
         //todo** use TypedResults<IResult> for ease of unit tests
         

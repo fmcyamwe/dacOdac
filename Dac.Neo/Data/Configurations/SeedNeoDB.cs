@@ -1,4 +1,5 @@
 
+using Dac.Neo.Data.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Dac.Neo.Data.Configurations;
@@ -98,11 +99,18 @@ public interface ISeeder
         /// <summary>
         /// Add some initial Data
         /// </summary>
-        public async Task<bool> AddDummyData()
+        public async Task<bool> AddDummyData() //todo pass in contentRootPath
         {
             //todo** either load csv or some else...
-            return await Task.Factory.StartNew(() => true);
+            var contentRootPath = "";
             
+            var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
+            var sourceJson = File.ReadAllText(sourcePath);
+            var sourceItems = JsonExtensions.FromJson<PatientDB[]>(sourceJson); 
+            //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
+
+             //then do same for Doctor---todo**
+            return await Task.Factory.StartNew(() => true);
         }
 
         public void Dispose()

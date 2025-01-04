@@ -56,7 +56,7 @@ public static class Neo4jExtensions
         return services;
     }
 
-    public static async void CheckMigration(IServiceProvider sp)
+    public static async void CheckMigration(IServiceProvider sp) //IHostEnvironment hEnv
     {
        
         var sd = sp.GetService<ISeeder>();
@@ -64,6 +64,14 @@ public static class Neo4jExtensions
             Console.WriteLine("CheckMigration::Seeder == null>> ERROR!! Aborting :(...");
             return;
         }//else{Console.WriteLine("CheckMigration::Seeder GOOD {0}",sd);} 
+
+        //Console.WriteLine("CheckMigration::Seeder GOOD {0} >> {1} >> {2}",sd,hEnv.ContentRootPath,hEnv.EnvironmentName);
+        ////>>wrong >>  /Users/florentcyamweshi/dacOdac/Dac.API >> Development
+        string currentDir = Environment.CurrentDirectory;
+
+        Console.WriteLine("CheckMigration::Seeder GOOD {0} ",currentDir);//smdh also shows >>/Users/florentcyamweshi/dacOdac/Dac.API
+
+        //var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
         
         bool populated = await sd.AlreadyPopulated(); 
         

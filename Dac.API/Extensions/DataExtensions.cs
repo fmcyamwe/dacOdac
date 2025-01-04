@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using Dac.Neo;
 using Dac.API.Services;
 using Dac.API.Constants;
+using Dac.API.Model;
 
 namespace Dac.API.Extensions;
 
@@ -26,11 +27,12 @@ public static class DataExtensions
 
         //auth middleware could go here prolly
         services.AddProblemDetails(); //toSee** for Exceptions
+        
 
         //services.AddAntiforgery(); //todo** Configure
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        //needed?!? nope dont seem so? >>umm for swagger? dont seem to help
+        //needed?!? nope dont seem so? >>umm for swagger? nope >> dont seem to help
         /*services.AddSwaggerGen(c => {
 
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -129,13 +131,19 @@ public static class DataExtensions
         var sp = services.BuildServiceProvider(); 
 
         //seed Graph DB
-        Neo4jExtensions.CheckMigration(sp);
+        Neo4jExtensions.CheckMigration(sp); //umm builder.Environment? >>nope
     }
 
     public static IEndpointRouteBuilder MapApiV1(this IEndpointRouteBuilder app)
     {
-        Console.WriteLine("WOAH:: in MapApiV1!!");//, app.?.FirstName ?? "", doctor?.LastName);
-        
+        Console.WriteLine("WOAH:: in MapApiV1!!"); //umm should use?
+
+        /*app.MapGet("/products", () => new[] { "Product1", "Product2" });
+        app.MapPost("/products", (PatientRequest product) =>
+        {
+            return Results.Created($"/products/{product.Action}", product);
+        });*/
+
         return app;
     }
 

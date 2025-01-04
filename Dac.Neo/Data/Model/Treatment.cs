@@ -1,18 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Dac.Neo.Model; 
+namespace Dac.Neo.Data.Model; 
 
-public class Treatment(string name, string by)
+public class Treatment //string name, string by
 {
-    [Required]
-    public string Name { get; set; } = name;
+    public Treatment(){} //prolly gotta add neo4J annotations...
+    //[Required]
+    public string Name { get; set; } //= name;
     
-    [Required]
-    public string PrescribedBy { get; set;} = by; //doctor's Id 
+    //[Required]
+    public string By { get; set;} //= by; //doctor's Id 
 
     public string? Details { get; set;}
     
-    public DateTime StartDate { get; set;}
+    public long StartDate { get; set;} //long instead of DateTime
 
-    public DateTime? EndDate { get; set;}
+    public long? EndDate { get; set;} //DateTime
 }
