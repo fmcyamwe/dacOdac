@@ -53,8 +53,8 @@ app.UseCors(CORS_POLICY);
 app.UseAuthorization(); //toTest* and has to be between useRouting & mapControllers
 
 //endpoints.MapApiV1()
-//app.MapControllers().WithOpenApi(); //withOpenApi?
-app.UseEndpoints(endpoints => {endpoints.MapApiV1();}); //huh works...?!?
+app.MapControllers().WithOpenApi(); //withOpenApi?
+//app.UseEndpoints(endpoints => {endpoints.MapApiV1();}); //huh works...?!?
 
 app.UseStatusCodePages(); //toTest if should use?!? 
 app.MapDefaultControllerRoute(); //huh notFound errors when commented out

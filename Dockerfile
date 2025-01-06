@@ -45,8 +45,8 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 #should expose swagger port? meh
-EXPOSE 5113
-EXPOSE 7687
-EXPOSE 7474
+#EXPOSE 5113
+#EXPOSE 7687
+#EXPOSE 7474
 #CMD ["dotnet", "Dac.Neo.dll"]
 ENTRYPOINT ["dotnet", "Dac.API.dll"]

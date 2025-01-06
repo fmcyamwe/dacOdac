@@ -37,7 +37,7 @@ public class GetPatient : BaseController // ControllerBase
             }); //(Task<IResult>)Results.BadRequest();
         }
 
-        var p = await _apiService.FetchPatientByID(id); //todo** catch any exception here!
+        var p = await _apiService.FetchPatientByID(id, true); //todo** catch any exception here!
         return TypedResults.Ok(p); 
         //(Task<IResult>)Results.Ok();
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>

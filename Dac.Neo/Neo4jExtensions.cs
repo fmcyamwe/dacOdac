@@ -67,9 +67,11 @@ public static class Neo4jExtensions
 
         //Console.WriteLine("CheckMigration::Seeder GOOD {0} >> {1} >> {2}",sd,hEnv.ContentRootPath,hEnv.EnvironmentName);
         ////>>wrong >>  /Users/florentcyamweshi/dacOdac/Dac.API >> Development
-        string currentDir = Environment.CurrentDirectory;
+        //string currentDir = Environment.CurrentDirectory;
 
-        Console.WriteLine("CheckMigration::Seeder GOOD {0} ",currentDir);//smdh also shows >>/Users/florentcyamweshi/dacOdac/Dac.API
+        //Console.WriteLine("CheckMigration::Seeder GOOD {0} ",currentDir);
+        //smdh also shows >>/Users/florentcyamweshi/dacOdac/Dac.API
+        ///Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json
 
         //var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
         
@@ -84,9 +86,8 @@ public static class Neo4jExtensions
         await sd.CreateDoctorNodeConstraints();
                 
         //todo** seed graphDB with initial data...
-
-        //Console.WriteLine("CheckMigration::CreateConstraints >>"); //
-
+        //var e = await sd.AddDummyData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedPatient.json");
+        //////Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json
        return;
     }
 }

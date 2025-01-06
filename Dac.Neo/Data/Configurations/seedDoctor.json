@@ -1,12 +1,12 @@
 [
   {
-    "Id": 1,
+    "Id": "1",
     "FirstName": "Zeus",
     "LastName": "Grabner",
     "Speciality": "Dermatology"
   },
   {
-    "Id": 2,
+    "Id": "2",
     "FirstName": "Mike",
     "LastName": "Mao",
     "Speciality": "Geneticist"

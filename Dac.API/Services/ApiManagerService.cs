@@ -1,6 +1,7 @@
 
 using Dac.Neo.Repositories;
 using Dac.API.Model; 
+using Dac.Neo.Data.Model;
 
 namespace Dac.API.Services;
 public class ApiManagerService : IApiManagerService
@@ -36,26 +37,45 @@ public class ApiManagerService : IApiManagerService
         return await _patientRepository.AddPatient(Mapper.MapToPatientNode(patient));
     }
 
-    public async Task<Patient> FetchPatientByID(string id)
+    public async Task<Patient> FetchPatientByID(string id, bool fetchAll)
     {
         try
         {
             var p = await _patientRepository.FetchPatientByID(id);
+            if(!fetchAll){ //for updating patient no need to fetch everything
+                return Mapper.MapFromPatientNode(p);
+            }
 
             var currentDocs = await _patientRepository.PatientAttendingDoctors(id);
             _logger.LogInformation("FetchPatientByID >> PatientAttendingDoctors {id} >> {docs} > {size}", id,currentDocs,currentDocs.Count);
+            
+            var currentDocsList = currentDocs.Select(Mapper.MapDictionaryToModel).ToList(); //had to add static...
 
-            var currentTreatment = await _patientRepository.CurrentPatientTreatment(id);//todo** add to return
+            _logger.LogInformation("PatientAttendingDoctors::MapperAttendingDoctors >> {list}",currentDocsList);
+
+            var currentTreatment = await _patientRepository.CurrentPatientTreatment(id);
 
             _logger.LogInformation("FetchPatientByID >> CurrentPatientTreatment {id} > {currentTreatment}", id,currentTreatment);
         
-            return Mapper.MapFromPatientNode(p); //todo** add currentDocs to return
+            return Mapper.MapFromPatientNode(p, currentDocsList, currentTreatment);
         } catch (Exception ex){
             _logger.LogTrace(ex, "FetchPatientByID Exception!! {id}", id);
             throw new Exception("Patient not found");
         }
         //var p = await _patientRepository.FetchPatientByID(id) ?? throw new Exception("Patient not found");
         //return Mapper.MapFromPatientNode(p);
+    }
+    public async Task<List<Dictionary<string, object>>> FetchPatientAttendingDoctors(string id)
+    {
+        var currentDocs = await _patientRepository.PatientAttendingDoctors(id);
+        _logger.LogInformation("FetchPatientAttendingDoctors >> PatientAttendingDoctors {id} >> {docs} > {size}", id,currentDocs,currentDocs.Count);
+        return currentDocs;
+    }
+
+    public async Task<Treatment> CurrentPatientTreatment (string id)
+    {
+        var currentTreatment = await _patientRepository.CurrentPatientTreatment(id);
+        return currentTreatment;
     }
 
     public async Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName)
@@ -138,10 +158,13 @@ public class ApiManagerService : IApiManagerService
         if (currentTreatment != null)
         {
             //todo** should add .to to  currentTreatment before creating new Treatment || check that same doctor?!?
-            return await _doctorRepository.AddPatientTreatment(docId, patientId,name, details);
+            //yup to do >>add .to and create a new Treatment for versionning
+            _logger.LogInformation("AddUpdatePatientTreatment :: HAS TREATMENT {doctorId} <-> {by}", docId, currentTreatment.By);
+
+            return await _patientRepository.UpdatePatientTreatment(docId, patientId,name, details);
         }
 
-        return ""; //todo** check return at call site
+        return await _doctorRepository.AddPatientTreatment(docId, patientId,name, details); //todo** check return at call site
 
     }
 }

@@ -51,7 +51,7 @@ public class PatientController : BaseController  //ControllerBase
     }
 
     //GET patients/{id}/doctors
-    [Route("{id}/doctors")] //OR {id}/doctors/current
+    [Route("{id}/doctors")] //OR? {id}/doctors/current
     [HttpGet]
     [Tags("Patients")]
     [EndpointSummary("Patient's doctor")]
@@ -59,9 +59,11 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public Task<IResult> GetCurrentPatientDoctor([FromRoute] string id)
+    public async Task<IResult> GetCurrentPatientDoctor([FromRoute] string id)
     {
-        return (Task<IResult>)Results.Ok(true); //todo**
+        //return (Task<IResult>)Results.Ok(true); //todo**
+        var c = await _apiService.FetchPatientAttendingDoctors(id); //
+        return TypedResults.Ok(c);
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
 
@@ -80,16 +82,4 @@ public class PatientController : BaseController  //ControllerBase
         return TypedResults.Ok(c); //Results.Ok(true); //Task<IResult> 
     }
 
-    
-    /*// Post patients/new
-    [Route("new")]  //same as Post patients/ but explicit endpoint--toReview**
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    public Task<string> CreateNewPatient([FromBody] Patient patient)
-    {
-
-        return _apiService.AddPatient(patient); //_patientRepository
-    }*/
-    
 }

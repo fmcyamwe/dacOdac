@@ -9,12 +9,12 @@ public interface IPatientRepository
     Task<PatientDB> FetchPatientByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> PatientAttendingDoctors(string id); 
     Task<string> AddPatient(PatientDB person); //return string ID
-    Task<long> GetPatientCount();
-    Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
-        
     //todo** 
     //updatePatient?
-    Task<Treatment> CurrentPatientTreatment(string id); //todo** test parsing eh smh
+    Task<long> GetPatientCount();
+    Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
+    Task<Treatment> CurrentPatientTreatment(string id);
+    Task<string> UpdatePatientTreatment(string docId,string patientId, string name, string details);
 
     Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id);
     Task<string> CreatePatientRequest(string patientId, string doctorId, string action, string reason);

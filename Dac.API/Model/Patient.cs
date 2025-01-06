@@ -34,10 +34,10 @@ public class Patient
     //emergency_contact (can access medical history too)
     public string? Gender { get; set;} //string or someting smaller like rune? >>ENUM!!! https://ardalis.com/enum-alternatives-in-c/
 
-    public Doctor[]? AttendingDoctors { get; set;} //current doctor //could be multiple?
+    public List<AttendingDoctor>? AttendingDoctors { get; set;} //current doctor //could be multiple?
 
     //[JsonIgnore] //Name = "treatment")]
-    public Treatment? CurrentTreatment { get; set;} 
+    public Treatment? CurrentTreatment { get; set;}  //could also be multiple..toreview**
 
 /* //todo** re-enable below
    

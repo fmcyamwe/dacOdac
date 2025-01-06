@@ -79,3 +79,26 @@ public record TreatmentRequest(
   "details":"",
   //other stuf?
 }*/
+
+//p{doctorId: d.id, doctorName: d.firstName+' '+d.lastName, speciality: d.speciality, since: r.since, fromAction: r.fromAction }";
+public record AttendingDoctor( //test
+    [property: Description("The patient's Id")]
+    string DoctorId, 
+
+    [property: Description("Id of doctor adding Treatment")]
+    //[property: Required()] //borks when this present...coliiis
+    //[JsonPropertyName("id"), JsonIgnore]
+    string DoctorName,
+
+    [property: Description("Name of Treatment")]
+    [property: DefaultValue("")]
+    string Speciality,
+
+    [property: Description("Name of Treatment")]
+    [property: DefaultValue("")]
+    string? FromAction,
+
+    [property: Description("Some details")]
+    [property: DefaultValue("")]
+    long? Since
+);

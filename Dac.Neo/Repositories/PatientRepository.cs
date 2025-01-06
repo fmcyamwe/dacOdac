@@ -200,7 +200,9 @@ namespace Dac.Neo.Repositories;
         public async Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id)
         {
             //todo**
+            //MATCH (p:Patient) WHERE p.id = $id
             //get all requests
+            //MATCH p=(a:Patient {id: '544e30f81841'})-[r:REQUESTED]->() RETURN r order by r.date
             //get all Treatments
             //get all attending doctors
             //order by date or something....
@@ -222,5 +224,28 @@ namespace Dac.Neo.Repositories;
             
             //toTest or need manual return?
             return await _neo4jDataAccess.ExecuteReadScalarToModelAsync<Treatment>(query, "t", parameters); 
+        }
+
+        //todo** review if shouldnt pass in Treatment
+        public async Task<string> UpdatePatientTreatment(string docId, string patientId,string name, string details) 
+        {
+            var query = @"MATCH (p:Patient {id:$patientId})-[r:HAS_TREATMENT]->(:Treatment)
+                        WHERE r.to is null
+                        WITH p, r
+                        SET r.to = timestamp(), r.updatedBy = $docId
+                        CREATE (p)-[:HAS_TREATMENT {from: timestamp()}]->(t:Treatment {by: $docId, name:$name, details:$details, startDate:timestamp()})
+                        RETURN t.by";
+                //OPTIONAL MATCH? limit?!?  and updatedBy? //also create?
+                // (d)<-[r:PATIENT_OF]-(p:Patient) WHERE r.to IS NULL
+            IDictionary<string, object> parameters = new Dictionary<string, object> 
+            {
+                { "patientId",patientId},
+                { "docId", docId},
+                { "name", name},
+                { "details", details}            
+            };
+            
+            //toTest or need manual return?
+            return await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters);
         }
     }

@@ -27,9 +27,12 @@ public class Treatments : BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public Task<IResult> GetPatientTreatments([FromRoute] string id)
+    public async Task<IResult> GetPatientTreatments([FromRoute] string id)
     {
-        return (Task<IResult>)Results.Ok(true);  //todo** surface with .CurrentPatientTreatment(id)
+        //return (Task<IResult>)Results.Ok(true);  //todo** surface with .CurrentPatientTreatment(id)
+        var p = await _apiService.CurrentPatientTreatment(id);
+
+        return TypedResults.Ok(p); //no complains?!?
     }
 
     //POST patients/{id}/treatments

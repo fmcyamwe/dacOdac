@@ -10,15 +10,15 @@ public interface ISeeder
         Task<bool> AlreadyPopulated();
         Task CreatePatientNodeConstraints(); //creates indexes underneath
         Task CreateDoctorNodeConstraints();
-        Task<bool> AddDummyData(); 
+        Task<bool> AddDummyData(string path); 
        
     }
 
     public class Seeder : ISeeder, IDisposable
     {
-        private INeo4jDataAccess _neo4jDataAccess;
+        private readonly INeo4jDataAccess _neo4jDataAccess;
 
-        private ILogger<Seeder> _logger;
+        private readonly ILogger<Seeder> _logger;
 
         /// <summary>
         /// Initializes indexes and seed with some data on startup.
@@ -99,18 +99,21 @@ public interface ISeeder
         /// <summary>
         /// Add some initial Data
         /// </summary>
-        public async Task<bool> AddDummyData() //todo pass in contentRootPath
+        public async Task<bool> AddDummyData(string sourcePath)
         {
             //todo** either load csv or some else...
-            var contentRootPath = "";
+            //var contentRootPath = "";
             
-            var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
+            //var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
             var sourceJson = File.ReadAllText(sourcePath);
             var sourceItems = JsonExtensions.FromJson<PatientDB[]>(sourceJson); 
             //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
+            
+            _logger.LogInformation("AddDummyData:: {sourceItems}", sourceItems);
+            Console.WriteLine("AddDummyData:: {0}", sourceItems);
 
              //then do same for Doctor---todo**
-            return await Task.Factory.StartNew(() => true);
+            return await Task.Factory.StartNew(() => sourceItems == null);
         }
 
         public void Dispose()

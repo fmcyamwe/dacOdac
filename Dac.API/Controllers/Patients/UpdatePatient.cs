@@ -38,7 +38,7 @@ public class UpdatePatient : BaseController // ControllerBase
 
         try
         {
-            var p = await _apiService.FetchPatientByID(id);
+            var p = await _apiService.FetchPatientByID(id, false);
             p.FirstName = patient.FirstName;
             p.LastName = patient.LastName;
             p.Born = patient.Born;

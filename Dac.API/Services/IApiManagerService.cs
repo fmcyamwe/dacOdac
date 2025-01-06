@@ -1,5 +1,6 @@
-using Dac.Neo.Repositories;
+
 using Dac.API.Model; 
+using Dac.Neo.Data.Model;
 
 namespace Dac.API.Services;
 public interface IApiManagerService
@@ -11,7 +12,9 @@ public interface IApiManagerService
     Task<long> GetPatientCount(); //for testing---toRemove
     Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
     Task<string> AddPatient(Patient person); //return string ID
-    Task<Patient> FetchPatientByID(string id); //requiere auth!
+    Task<Patient> FetchPatientByID(string id, bool fetchAll); //requiere auth!
+    Task<List<Dictionary<string, object>>> FetchPatientAttendingDoctors(string id);
+    Task<Treatment> CurrentPatientTreatment(string id);
     Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName);
 
     Task<string> CreatePatientRequest(string patientId, PatientRequest v);
