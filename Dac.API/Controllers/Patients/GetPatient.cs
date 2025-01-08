@@ -3,7 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults; 
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
 
 
 using Dac.API.Model;
@@ -43,6 +47,7 @@ public class GetPatient : BaseController // ControllerBase
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
 
+    /*
     // GET patients/count
     [Route("patients/count")]
     [HttpGet]
@@ -56,6 +61,25 @@ public class GetPatient : BaseController // ControllerBase
         var c = await _apiService.GetPatientCount();  //_patientRepository.GetPatientCount();
 
         return TypedResults.Ok(c); 
+    }*/
+
+    //GET patients/ 
+    [Route("patients/{id}/more")]
+    [HttpGet]
+    [Tags("Patients")]
+    [EndpointSummary("Get patients")]
+    [EndpointDescription("Get list of patients")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    //[Authorize]
+    //[Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
+    public async Task<Ok<List<Dictionary<string, object>>>> GetMedicHistoryPatient([FromRoute] string id)
+    {
+        var c = await _apiService.PatientMedicalHistory(id); 
+
+        return TypedResults.Ok(c); 
+
     }
 
 }

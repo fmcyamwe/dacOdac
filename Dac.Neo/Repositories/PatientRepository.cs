@@ -82,10 +82,24 @@ namespace Dac.Neo.Repositories;
         /// </summary>
         public async Task<long> GetPatientCount()
         {
-            var query = @"Match (p:Patient) RETURN count(p) as patientCount";
+            //MATCH (n:Patient)-[r:PATIENT_OF]-() RETURN n, count(DISTINCT r) AS num
+            var query = @"MATCH (p:Patient) RETURN count(p) as patientCount";
             var count = await _neo4jDataAccess.ExecuteReadScalarAsync<long>(query);
             _logger.LogInformation("GetPatientCount {count}", count);
             return count;
+        }
+
+        /// <summary>
+        /// Random patient for login.
+        /// </summary>
+        public async Task<string> RandomPatient() 
+        {
+
+            var query = @"MATCH (d:Patient)-[r:REQUESTED]-() with d, count(distinct r) as i 
+                        RETURN d.id order by i desc limit 1";
+            
+            return await _neo4jDataAccess.ExecuteReadScalarAsync<string>(query);
+            //return count;
         }
 
         public async Task<string> CreatePatientRequest(string patientId, string docId, string action, string reason)
@@ -184,8 +198,8 @@ namespace Dac.Neo.Repositories;
                         MATCH (d:Doctor {id: $docId})
                         MERGE (p)-[r:PATIENT_OF]->(d)
                         ON CREATE SET r.since = timestamp(), r.fromAction = $action
-                        ON MATCH SET r.fromAction = $action, r.updatedAt = timestamp()
-                        RETURN r.fromAction";//umm match? 
+                        ON MATCH SET r.fromAction = r.fromAction+ '<->' +$action, r.updatedAt = timestamp()
+                        RETURN r.fromAction";//umm match toTest** no overwrite of fromAction  
 
             IDictionary<string, object> parameters = new Dictionary<string, object> { 
                 { "docId", docId },
@@ -199,14 +213,34 @@ namespace Dac.Neo.Repositories;
 
         public async Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id)
         {
+            // OPTIONAL MATCH (p)-[r:PATIENT_OF]->(d:Doctor) WHERE r.to IS NULL
+            //umm better to do small query instead?!? and merge data... especially for order...
+            
             //todo**
             //MATCH (p:Patient) WHERE p.id = $id
             //get all requests
             //MATCH p=(a:Patient {id: '544e30f81841'})-[r:REQUESTED]->() RETURN r order by r.date
             //get all Treatments
-            //get all attending doctors
+            //get all attending doctors >>done >>PatientAttendingDoctors()
             //order by date or something....
-            return await Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
+            //umm need doctor?
+            //order by r.date first then h.from? or both at end? toTest
+            var query = @"OPTIONAL MATCH (p:Patient {id: $id})-[r:REQUESTED]->(d) with p, r,d 
+                        OPTIONAL MATCH (p)-[h:HAS_TREATMENT]->(t:Treatment)
+                        RETURN {daP:p.id,daDoc:d.id,from:h.from,deets:t.details, date:r.date} as w";
+                        //RETURN p,d,h,t, r order by r.date"; 
+                        //{daP:p,daDoc:d,from:h,deets:t, date:r.date} as w 
+                        //{daP:p.id,daDoc:d.id,from:h.from,deets:t.details, date:r.date} as w 
+            
+            //"OPTIONAL MATCH (p:Patient {id: $id})-[r:REQUESTED]->() RETURN r order by r.date
+            //OPTIONAL MATCH (p:Patient {id: $id})-[r:HAS_TREATMENT]->() RETURN r order by r.date
+            //RETURN p{doctorId: d.id, doctorName: d.firstName+' '+d.lastName, speciality: d.speciality, since: r.since, fromAction: r.fromAction }";
+                        //could just return d, r  smh
+            IDictionary<string, object> parameters = new Dictionary<string, object> {
+                { "id", id }
+            };
+
+            return await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "w", parameters);   //Task.Factory.StartNew(() => new List<Dictionary<string, object>>());
 
         }
 

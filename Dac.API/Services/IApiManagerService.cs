@@ -9,14 +9,14 @@ public interface IApiManagerService
     ILogger<ApiManagerService> GetLogger();
     
     /////Patient/////
-    Task<long> GetPatientCount(); //for testing---toRemove
+    Task<string[]> GetPatientCount(); //for testing---toRemove
     Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
     Task<string> AddPatient(Patient person); //return string ID
     Task<Patient> FetchPatientByID(string id, bool fetchAll); //requiere auth!
     Task<List<Dictionary<string, object>>> FetchPatientAttendingDoctors(string id);
     Task<Treatment> CurrentPatientTreatment(string id);
     Task<List<Dictionary<string, object>>> SearchPatientByFullName(string firstName, string lastName);
-
+    Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id);
     Task<string> CreatePatientRequest(string patientId, PatientRequest v);
 
     /////Doctor/////

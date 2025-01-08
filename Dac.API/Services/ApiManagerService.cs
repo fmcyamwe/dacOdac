@@ -23,9 +23,10 @@ public class ApiManagerService : IApiManagerService
         return _logger;
     }
 
-    public async Task<long> GetPatientCount()
+    public async Task<string[]> GetPatientCount()
     {
-        return  await _patientRepository.GetPatientCount();
+        return await RandomLoginAccts();
+        //return  await _patientRepository.GetPatientCount();
     }
     
     public async Task<List<Dictionary<string, object>>> GetAllPatients()
@@ -35,6 +36,30 @@ public class ApiManagerService : IApiManagerService
     public async Task<string> AddPatient(Patient patient)
     {
         return await _patientRepository.AddPatient(Mapper.MapToPatientNode(patient));
+    }
+
+    public async Task<string[]> RandomLoginAccts() //Task<string>
+    {//Dictionary<string, string>
+        var rDoc = await _doctorRepository.RandomDoctor();
+        var rPatient = await _patientRepository.RandomPatient();
+
+        _logger.LogInformation("RandomLoginAccts:: >> {rDoc} >> {rPatient}",rDoc, rPatient);
+
+        return [rDoc,rPatient]; //(rDoc, rPatient);
+    } 
+
+    public async Task<List<Dictionary<string, object>>> PatientMedicalHistory(string id)
+    {
+         var currentDocs = await _patientRepository.PatientAttendingDoctors(id);
+            _logger.LogInformation("PatientMedicalHistory >> PatientAttendingDoctors {id} >> {docs} > {size}", id,currentDocs,currentDocs.Count);
+            
+        var currentDocsList = currentDocs.Select(Mapper.MapDictionaryToModel).ToList();
+
+        //totTtest
+        //@"MATCH (p:Patient {id: "544e30f81841"})-[r:HAS_TREATMENT]->() with p match q=(p)-[r:REQUESTED]->() RETURN p,q"
+        var ptMedicHist =  await _patientRepository.PatientMedicalHistory(id); 
+
+        return ptMedicHist; //todo add attendingDocts
     }
 
     public async Task<Patient> FetchPatientByID(string id, bool fetchAll)
@@ -49,7 +74,7 @@ public class ApiManagerService : IApiManagerService
             var currentDocs = await _patientRepository.PatientAttendingDoctors(id);
             _logger.LogInformation("FetchPatientByID >> PatientAttendingDoctors {id} >> {docs} > {size}", id,currentDocs,currentDocs.Count);
             
-            var currentDocsList = currentDocs.Select(Mapper.MapDictionaryToModel).ToList(); //had to add static...
+            var currentDocsList = currentDocs.Select(Mapper.MapDictionaryToModel).ToList();
 
             _logger.LogInformation("PatientAttendingDoctors::MapperAttendingDoctors >> {list}",currentDocsList);
 

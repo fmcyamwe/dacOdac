@@ -35,23 +35,7 @@ public class PatientDB //<T> where T : new()//: ILookupDataResponse<PatientDB>
     //todo** if enough time for Address, phone and contact info...
     //emergency_contact (can access medical history too)
 
-    [Neo4jProperty(Ignore = true)] // ignore a property, so no attempt is made to read it
+    [Neo4jProperty(Name = "gender")] //(Ignore = true) ?? ignore a property, so no attempt is made to read it
     public string? Gender { get; set;} //string or someting smaller like rune? >>ENUM!!! https://ardalis.com/enum-alternatives-in-c/
 
-    //current doctor? >>nah can just query...prolly? toReview**
-/*
-    //[JsonIgnore]
-    [Neo4jProperty(Ignore = true, Name = "treatment")]
-    public Treatment? CurrentTreatment { get; set;} //umm shouldnt this be actually an ID?!? toReview**
-
-    //[JsonIgnore]
-    [Neo4jProperty(Ignore = true)]
-    public List<Treatment>? MedicalHistory { get; set; }//DEF need auth** //only viewable & editable by doctor
-
-    //[JsonIgnore] //does hide from schema
-    [Neo4jProperty(Ignore = true)]
-    public DateTime? VisitDate { get; set;} //or lastVisitDate?
-*/
-
-//string json = JsonExtensions.FromJson(person);
 }

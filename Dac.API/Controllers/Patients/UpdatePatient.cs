@@ -29,6 +29,7 @@ public class UpdatePatient : BaseController // ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     public async Task<IResult> UpdateAPatient([FromRoute] string id, [FromBody] Patient patient)
     {
+        
         if (patient == null)
         {
             return TypedResults.BadRequest<ProblemDetails>(new (){

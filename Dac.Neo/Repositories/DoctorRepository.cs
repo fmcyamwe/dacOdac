@@ -120,17 +120,18 @@ namespace Dac.Neo.Repositories;
         }
 
         
-        /*/// <summary>
-        /// Get count of patients in Doctor's care.
+        /// <summary>
+        /// Random doctor for login.
         /// </summary>
-        public async Task<long> GetPatientsCount(string id) 
-        {//todo** should be a list -
-
-            //todo** use id and change to query Relationship
-            var query = @"Match (d:Doctor) RETURN count(d) as patientCount";
-            var count = await _neo4jDataAccess.ExecuteReadScalarAsync<long>(query);
-            return count;
-        }*/
+        public async Task<string> RandomDoctor() 
+        {
+            //todo**MATCH (n:Patient)-[r:PATIENT_OF]-() RETURN n, count(DISTINCT r) AS num
+            var query = @"Match (d:Doctor)<-[r:REQUESTED]-() with d, count(distinct r) as i 
+                        RETURN d.id order by i desc limit 1";
+            
+            return await _neo4jDataAccess.ExecuteReadScalarAsync<string>(query);
+           
+        }
 
         public async Task<List<Dictionary<string, object>>> GetPendingRequests(string id)
         {

@@ -8,7 +8,7 @@ namespace Dac.Neo.Repositories;
         Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
         Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality(); //group
         Task<string> AddDoctor(DoctorDB doc); 
-
+        Task<string> RandomDoctor();
         Task<DoctorDB> FetchDoctorByID(string id); //requiere auth!
        
         Task<string> AddPatientTreatment(string docId,string patientId, string name, string details);

@@ -12,6 +12,7 @@ public interface IPatientRepository
     //todo** 
     //updatePatient?
     Task<long> GetPatientCount();
+    Task<string> RandomPatient();
     Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
     Task<Treatment> CurrentPatientTreatment(string id);
     Task<string> UpdatePatientTreatment(string docId,string patientId, string name, string details);

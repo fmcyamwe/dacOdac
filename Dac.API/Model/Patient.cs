@@ -32,6 +32,7 @@ public class Patient
     //phone? or contact info...
     //todo** if enough time for Address, phone and contact info...
     //emergency_contact (can access medical history too)
+    [JsonPropertyName("gender")]
     public string? Gender { get; set;} //string or someting smaller like rune? >>ENUM!!! https://ardalis.com/enum-alternatives-in-c/
 
     public List<AttendingDoctor>? AttendingDoctors { get; set;} //current doctor //could be multiple?
