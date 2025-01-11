@@ -28,10 +28,12 @@ public class ListDoctors : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Ok<List<Dictionary<string, object>>>> GetAllDoctors()//todo add pagination >> [AsParameters] PaginationRequest paginationRequest
-    {
-        
-        var p = await _apiService.GetAllDoctors();
+    public async Task<Ok<List<Dictionary<string, object>>>> GetAllDoctors([FromQuery] PaginationRequest paginationRequest)
+    {    //[AsParameters] PaginationRequest paginationRequest) //[AsParameters] dont work......fromQuery does >> //doctors?PageSize=10&PageIndex=0'
+    
+         _apiService.GetLogger().LogInformation("GetAllDoctors :: PaginationRequest {index} > {size} ", paginationRequest.PageIndex, paginationRequest.PageSize);
+         
+        var p = await _apiService.GetAllDoctors(paginationRequest.PageSize, paginationRequest.PageIndex);
         return TypedResults.Ok(p); 
 
         //Results.Ok();//return TypedResults.Ok();

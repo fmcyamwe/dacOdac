@@ -105,14 +105,15 @@ namespace Dac.Neo.Repositories;
 
         }
 
-        public async Task<List<Dictionary<string, object>>> GetAllDoctors() //todo** paginate
+        public async Task<List<Dictionary<string, object>>> GetAllDoctors(int skipPaginate) ///todo** pass in pageRequest too...
         {
-            var query = @"Match (d:Doctor) 
-            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } LIMIT 20"; 
+            var query = @"Match (d:Doctor)
+            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } ORDER BY d.lastName SKIP $skip LIMIT 3"; //default 10 
             //order by?
             //coalesce for missing info prolly --todo**
             //should upper-case first letter --todo**
-            var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d");
+            IDictionary<string, object> parameters = new Dictionary<string, object> { { "skip", skipPaginate }};
+            var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d",parameters);
 
             _logger.LogInformation("GetAllDoctors {count}", doctors.Count);
 

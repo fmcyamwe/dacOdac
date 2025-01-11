@@ -10,7 +10,7 @@ public interface IApiManagerService
     
     /////Patient/////
     Task<string[]> GetPatientCount(); //for testing---toRemove
-    Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
+    Task<List<Dictionary<string, object>>> GetAllPatients(int pageSize, int pageIndex);
     Task<string> AddPatient(Patient person); //return string ID
     Task<Patient> FetchPatientByID(string id, bool fetchAll); //requiere auth!
     Task<List<Dictionary<string, object>>> FetchPatientAttendingDoctors(string id);
@@ -20,7 +20,7 @@ public interface IApiManagerService
     Task<string> CreatePatientRequest(string patientId, PatientRequest v);
 
     /////Doctor/////
-    Task<List<Dictionary<string, object>>> GetAllDoctors();
+    Task<List<Dictionary<string, object>>> GetAllDoctors(int pageSize, int pageIndex);
     Task<string> AddDoctor(Doctor doc); //auth
     Task<Doctor> FetchDoctorByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);

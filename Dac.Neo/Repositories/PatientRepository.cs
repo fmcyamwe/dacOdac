@@ -127,13 +127,15 @@ namespace Dac.Neo.Repositories;
         /// <summary>
         /// List Patients with minimal information
         /// </summary>
-        public async Task<List<Dictionary<string, object>>> GetAllPatients()
+        public async Task<List<Dictionary<string, object>>> GetAllPatients(int skipPaginate) //todo** pass in pageRequest too...
         {
-            var query = @"Match (p:Patient) RETURN p{ Id: p.id, firstName: p.firstName, lastName: p.lastName } LIMIT 20"; 
+            var query = @"Match (p:Patient) RETURN p{ Id: p.id, firstName: p.firstName, lastName: p.lastName } ORDER BY p.lastName SKIP $skip LIMIT 3"; //default 10
             //order by?
             //coalesce for missing info prolly --todo**
             //should upper-case first letter --todo**
-            var patients = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "p");
+            IDictionary<string, object> parameters = new Dictionary<string, object> { { "skip", skipPaginate }};
+
+            var patients = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "p",parameters); //skip
 
             _logger.LogInformation("GetAllPatients {count}", patients.Count);
 
@@ -227,7 +229,7 @@ namespace Dac.Neo.Repositories;
             //order by r.date first then h.from? or both at end? toTest
             var query = @"OPTIONAL MATCH (p:Patient {id: $id})-[r:REQUESTED]->(d) with p, r,d 
                         OPTIONAL MATCH (p)-[h:HAS_TREATMENT]->(t:Treatment)
-                        RETURN {daP:p.id,daDoc:d.id,from:h.from,deets:t.details, date:r.date} as w";
+                        RETURN {daP:p.id,daDoc:d.id,from:h.from,deetsN:t.name, deets:t.details, date:r.date} as w";
                         //RETURN p,d,h,t, r order by r.date"; 
                         //{daP:p,daDoc:d,from:h,deets:t, date:r.date} as w 
                         //{daP:p.id,daDoc:d.id,from:h.from,deets:t.details, date:r.date} as w 

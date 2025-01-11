@@ -29,9 +29,9 @@ public class ApiManagerService : IApiManagerService
         //return  await _patientRepository.GetPatientCount();
     }
     
-    public async Task<List<Dictionary<string, object>>> GetAllPatients()
+    public async Task<List<Dictionary<string, object>>> GetAllPatients(int pageSize, int pageIndex)
     {
-        return await _patientRepository.GetAllPatients();
+        return await _patientRepository.GetAllPatients(pageIndex >=1 ? pageSize*pageIndex : 0); //skip 0 at first--toReview**
     }
     public async Task<string> AddPatient(Patient patient)
     {
@@ -114,9 +114,9 @@ public class ApiManagerService : IApiManagerService
 
     }
 
-    public async Task<List<Dictionary<string, object>>> GetAllDoctors()
+    public async Task<List<Dictionary<string, object>>> GetAllDoctors(int pageSize, int pageIndex)
     {
-        return await _doctorRepository.GetAllDoctors();
+        return await _doctorRepository.GetAllDoctors(pageIndex >=1 ? pageSize*pageIndex : 0); //umm skip be 0 at first..toReview&+**
     }
 
     public async Task<string> AddDoctor(Doctor doctor)

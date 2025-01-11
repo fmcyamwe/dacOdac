@@ -6,12 +6,12 @@ using System.Text.Json.Serialization;
 namespace Dac.API.Model; 
 
 public record PaginationRequest(
-    [property: Description("Number of items to return in a single page of results")]
+    [property: Description("Number of items to return in single request")]
     [property: DefaultValue(10)]
     int PageSize = 10,
 
     [property: Description("The index of the page of results to return")]
-    [property: DefaultValue(0)]
+    [property: DefaultValue(0)] //umm should be one for ease?
     int PageIndex = 0
 );
 

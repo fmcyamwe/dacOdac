@@ -13,7 +13,7 @@ public interface IPatientRepository
     //updatePatient?
     Task<long> GetPatientCount();
     Task<string> RandomPatient();
-    Task<List<Dictionary<string, object>>> GetAllPatients(); //should paginate--todo**
+    Task<List<Dictionary<string, object>>> GetAllPatients(int skipPaginate);
     Task<Treatment> CurrentPatientTreatment(string id);
     Task<string> UpdatePatientTreatment(string docId,string patientId, string name, string details);
 

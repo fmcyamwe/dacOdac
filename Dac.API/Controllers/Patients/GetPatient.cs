@@ -74,7 +74,7 @@ public class GetPatient : BaseController // ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     //[Authorize]
     //[Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
-    public async Task<Ok<List<Dictionary<string, object>>>> GetMedicHistoryPatient([FromRoute] string id)
+    public async Task<Ok<List<Dictionary<string, object>>>> GetPatientMedicalHistory([FromRoute] string id)
     {
         var c = await _apiService.PatientMedicalHistory(id); 
 

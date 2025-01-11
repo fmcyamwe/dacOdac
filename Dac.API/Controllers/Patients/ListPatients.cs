@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 using Dac.API.Services;
+using Dac.API.Model;
 
 namespace Dac.API.Controllers.Patients;
 
@@ -30,12 +31,12 @@ public class ListPatients : BaseController // ControllerBase
     //[Authorize]
     [Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
     //--seem needed as default authorize above fails :( ..or should just set Roles = "" ? toTry**
-    public async Task<Ok<List<Dictionary<string, object>>>> GetAllPatients() //List<Patient>  //IResult //Task<ActionResult<bool>>
-    {
+    public async Task<Ok<List<Dictionary<string, object>>>> GetAllPatients([FromQuery] PaginationRequest paginationRequest)
+    {//List<Patient>  //IResult //Task<ActionResult<bool>>
         
         //this actually is the minimum info for Patients (doesnt include Treatment,etc) <would need auth for extra details>
         
-        var p = await _apiService.GetAllPatients(); //_patientRepository
+        var p = await _apiService.GetAllPatients(paginationRequest.PageSize, paginationRequest.PageIndex); //_patientRepository
         return TypedResults.Ok(p); 
 
         //Results.Ok();//return TypedResults.Ok();

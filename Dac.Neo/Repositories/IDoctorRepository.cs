@@ -3,7 +3,7 @@ using Dac.Neo.Data.Model;
 namespace Dac.Neo.Repositories;
     public interface IDoctorRepository
     {
-        Task<List<Dictionary<string, object>>> GetAllDoctors();
+        Task<List<Dictionary<string, object>>> GetAllDoctors(int skipPaginate);
         Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);
         Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
         Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality(); //group
