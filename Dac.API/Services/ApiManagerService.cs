@@ -121,7 +121,7 @@ public class ApiManagerService : IApiManagerService
 
     public async Task<string> AddDoctor(Doctor doctor)
     {
-        return await _doctorRepository.AddDoctor(Mapper.MapToDoctorNode(doctor)); //todo** add GUIID here
+        return await _doctorRepository.AddDoctor(Mapper.MapToDoctorNode(doctor));
     }
 
     public async Task<Doctor> FetchDoctorByID(string id)
@@ -166,7 +166,8 @@ public class ApiManagerService : IApiManagerService
         
         if (!string.IsNullOrWhiteSpace(patientId) && newStatus != "rejected")
         {
-            //toReview** should allow only one attending doctor? >>makes sense to have many doctors tho.. 
+            //toReview** should allow only one attending doctor? >>makes sense to have many doctors tho..
+            //todo** redundant operation if already patient_of....BUT useful to update r.fromAction?
             return await _patientRepository.AddAttendingDoctor(patientId,doctorId, action);
         }
 

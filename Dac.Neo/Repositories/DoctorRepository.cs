@@ -108,7 +108,8 @@ namespace Dac.Neo.Repositories;
         public async Task<List<Dictionary<string, object>>> GetAllDoctors(int skipPaginate) ///todo** pass in pageRequest too...
         {
             var query = @"Match (d:Doctor)
-            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } ORDER BY d.lastName SKIP $skip LIMIT 3"; //default 10 
+            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } 
+            ORDER BY d.lastName SKIP $skip LIMIT 3"; //default 10 
             //order by?
             //coalesce for missing info prolly --todo**
             //should upper-case first letter --todo**
@@ -128,7 +129,7 @@ namespace Dac.Neo.Repositories;
         {
             //todo**MATCH (n:Patient)-[r:PATIENT_OF]-() RETURN n, count(DISTINCT r) AS num
             var query = @"Match (d:Doctor)<-[r:REQUESTED]-() with d, count(distinct r) as i 
-                        RETURN d.id order by i desc limit 1";
+                        RETURN d.id ORDER BY i desc limit 1";
             
             return await _neo4jDataAccess.ExecuteReadScalarAsync<string>(query);
            
@@ -138,7 +139,8 @@ namespace Dac.Neo.Repositories;
         {
             var query = @"MATCH p=(d:Doctor)<-[r:REQUESTED {status: 'pending'}]-(a:Patient)
                         WHERE d.id = $docId
-                        RETURN r{patientId:a.id, action:r.action, reason:r.reason, on:r.date}";
+                        RETURN r{patientId:a.id, patientName: a.firstName+' '+a.lastName, action:r.action, reason:r.reason, on:r.date} 
+                        ORDER BY r.on";
             IDictionary<string, object> parameters = new Dictionary<string, object> { 
                 { "docId", id }  
             };

@@ -36,7 +36,15 @@ public static class Neo4jExtensions
             AuthTokens.Basic(settings.Neo4jUser, settings.Neo4jPassword));
         
         //verify connection...
-        driver.VerifyConnectivityAsync();  //could result in Exception so surround with try/catch --todo** //driver.CloseAsync()
+        try
+        {
+            driver.VerifyConnectivityAsync();
+        }catch(Exception e) {
+            Console.WriteLine("ConfigureNeo4jService:: EXCEPTION VerifyConnectivityAsync >> {0}",e);
+            //toSee** if container remains up instead of borking...
+            //driver.CloseAsync(); //--todo** //driver.CloseAsync()
+        }
+       
 
         services.AddSingleton(driver); 
 
@@ -78,16 +86,18 @@ public static class Neo4jExtensions
         bool populated = await sd.AlreadyPopulated(); 
         
         if(populated){
-            return;
+           return;
         }
 
         await sd.CreatePatientNodeConstraints();
 
         await sd.CreateDoctorNodeConstraints();
                 
-        //todo** seed graphDB with initial data...
-        //var e = await sd.AddDummyData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedPatient.json");
-        //////Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json
+        //seed graphDB with initial data...--toReview** use configuration Path instead of hardcoding
+        var e = await sd.SeedPatientData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedPatient.json");
+        var d = await sd.SeedDoctorData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json");
+            
+        ///also add some relationships?!? toReview**
        return;
     }
 }

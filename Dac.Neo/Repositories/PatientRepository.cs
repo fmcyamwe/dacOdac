@@ -200,7 +200,7 @@ namespace Dac.Neo.Repositories;
                         MATCH (d:Doctor {id: $docId})
                         MERGE (p)-[r:PATIENT_OF]->(d)
                         ON CREATE SET r.since = timestamp(), r.fromAction = $action
-                        ON MATCH SET r.fromAction = r.fromAction+ '<->' +$action, r.updatedAt = timestamp()
+                        ON MATCH SET r.fromAction = r.fromAction+'<->'+$action, r.updatedAt = timestamp()
                         RETURN r.fromAction";//umm match toTest** no overwrite of fromAction  
 
             IDictionary<string, object> parameters = new Dictionary<string, object> { 

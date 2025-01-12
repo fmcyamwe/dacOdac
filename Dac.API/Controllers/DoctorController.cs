@@ -57,9 +57,9 @@ public class DoctorController : BaseController //ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     //[AllowAnonymous] //authorization
-    public Task<List<Dictionary<string, object>>> FetchDoctorsB([FromRoute] string id)
+    public async Task<List<Dictionary<string, object>>> GetDoctorPendingRequests([FromRoute] string id)
     {
-        return _apiService.GetPatientRequests(id); //async? 
+        return await _apiService.GetPatientRequests(id);
     }
 
     [Route("{id}/requests")]

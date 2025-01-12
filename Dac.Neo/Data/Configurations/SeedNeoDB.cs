@@ -10,7 +10,8 @@ public interface ISeeder
         Task<bool> AlreadyPopulated();
         Task CreatePatientNodeConstraints(); //creates indexes underneath
         Task CreateDoctorNodeConstraints();
-        Task<bool> AddDummyData(string path); 
+        Task<bool> SeedPatientData(string path); 
+        Task<bool> SeedDoctorData(string path); 
        
     }
 
@@ -97,9 +98,9 @@ public interface ISeeder
         }
 
         /// <summary>
-        /// Add some initial Data
+        /// Add some initial Patient Data
         /// </summary>
-        public async Task<bool> AddDummyData(string sourcePath)
+        public async Task<bool> SeedPatientData(string sourcePath)
         {
             //todo** either load csv or some else...
             //var contentRootPath = "";
@@ -109,10 +110,71 @@ public interface ISeeder
             var sourceItems = JsonExtensions.FromJson<PatientDB[]>(sourceJson); 
             //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
             
-            _logger.LogInformation("AddDummyData:: {sourceItems}", sourceItems);
-            Console.WriteLine("AddDummyData:: {0}", sourceItems);
+            _logger.LogInformation("SeedPatientData:: {sourceItems}", sourceItems);
+            Console.WriteLine("SeedPatientData:: {0}", sourceItems);
 
-             //then do same for Doctor---todo**
+             var query = @"MERGE (p:Patient {upperFirstName: toUpper($firstName), upperLastName: toUpper($lastName)})
+                            ON CREATE SET p.firstName = $firstName, p.lastName = $lastName, p.id = $id, p.born = $born, p.gender = $gender
+                            ON MATCH SET p.born = $born, p.gender = $gender, p.updatedAt = timestamp()
+                            RETURN p.id"; 
+  
+            // Insert nodes
+            foreach (var person in sourceItems)
+            {
+                var id = Guid.NewGuid().ToString()[^12..];
+                
+                _logger.LogInformation("SeedPatientData:: {id}:{first}-{last} <>{gender}{born} :: {id}", person.Id, person.FirstName,  person.LastName, person.Gender, person.Born, id);
+                IDictionary<string, object> parameters = new Dictionary<string, object> 
+                { 
+                    { "firstName", person.FirstName },
+                    { "lastName", person.LastName },
+                    { "born", person.Born ?? 0 },
+                    { "id", id}, //oldie but just generating id here >> person.Id ?? "" 
+                    { "gender", person.Gender ?? ""},
+                    //todo** add other props and update in query
+                };
+
+                var ret = await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters); //should return?!? for and relationships ? toSee**
+                _logger.LogInformation("SeedPatientData:: END for {id}:{id} >> {ret} \n", person.Id, id, ret);
+            }
+            
+            return await Task.Factory.StartNew(() => sourceItems == null);
+        }
+
+        /// <summary>
+        /// Add some initial Doctor Data
+        /// </summary>
+        public async Task<bool> SeedDoctorData(string sourcePath)
+        {
+            var sourceJson = File.ReadAllText(sourcePath);
+            var sourceItems = JsonExtensions.FromJson<DoctorDB[]>(sourceJson); 
+            //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
+            
+            _logger.LogInformation("SeedDoctorData:: {sourceItems}", sourceItems);
+            Console.WriteLine("SeedDoctorData:: {0}", sourceItems);
+
+            var query = @"MERGE (d:Doctor {upperLastName: toUpper($lastName), speciality: $speciality})
+                        ON CREATE SET d.id = $id, d.firstName = $firstName, d.lastName = $lastName, d.practiseSince = $practiseSince
+                        ON MATCH SET d.firstName = $firstName, d.speciality = $speciality, d.updatedAt = timestamp() RETURN d.id";
+                         
+            // Insert nodes
+            foreach (var doctor in sourceItems)
+            {
+                var id = Guid.NewGuid().ToString()[^12..]; ////Guid.NewGuid().ToString()[^12..],  33d488c2-5bfd-4139-957d-4ac8e4ec9910 > 4ac8e4ec9910
+                _logger.LogInformation("SeedDoctorData:: {id}:{first}-{last} <>{speciality} >> {id}", doctor.Id, doctor.FirstName, doctor.LastName, doctor.Speciality,id);
+                IDictionary<string, object> parameters = new Dictionary<string, object> 
+                { 
+                    { "lastName", doctor.LastName },
+                    { "firstName", doctor.FirstName?.Trim() ?? "Dr"}, //default to 'Dr'
+                    { "speciality", doctor.Speciality ?? ""},
+                    { "id", id}, //doctor.Id ?? "" 
+                    { "practiseSince", doctor.PractiseSince ?? DateTime.Now}
+                };
+
+                var ret = await _neo4jDataAccess.ExecuteWriteTransactionAsync<string>(query, parameters); ////should return for and relationships? toSee**
+                //_logger.LogInformation("SeedDoctorData:: END for {id}:{f} >> {ret} \n", doctor.Id, id, ret);
+            }
+              
             return await Task.Factory.StartNew(() => sourceItems == null);
         }
 
