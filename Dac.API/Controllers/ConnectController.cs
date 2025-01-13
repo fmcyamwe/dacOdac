@@ -33,12 +33,12 @@ public class ConnectController : BaseController
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous] //authorization
     //[Authorize] //same as above...toTest* when enabled >> limit access to authenticated users for that controller or action.
-    public async Task<IResult> CanConnect() //[FromRoute] string id
+    public async Task<IResult> CanConnect()
     {//Ok<long>
         //TypedResults.Ok(); 
         //todo** use TypedResults<IResult> for ease of unit tests
         
-        return TypedResults.Ok(await _apiService.GetPatientCount()); 
+        return TypedResults.Ok(await _apiService.FetchRandomAccts()); 
     }
 
     // GET specialities  //hardcoded specialities for uniformity 

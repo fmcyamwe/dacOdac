@@ -108,7 +108,6 @@ public interface ISeeder
             //var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
             var sourceJson = File.ReadAllText(sourcePath);
             var sourceItems = JsonExtensions.FromJson<PatientDB[]>(sourceJson); 
-            //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
             
             _logger.LogInformation("SeedPatientData:: {sourceItems}", sourceItems);
             Console.WriteLine("SeedPatientData:: {0}", sourceItems);
@@ -148,7 +147,6 @@ public interface ISeeder
         {
             var sourceJson = File.ReadAllText(sourcePath);
             var sourceItems = JsonExtensions.FromJson<DoctorDB[]>(sourceJson); 
-            //JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson);
             
             _logger.LogInformation("SeedDoctorData:: {sourceItems}", sourceItems);
             Console.WriteLine("SeedDoctorData:: {0}", sourceItems);

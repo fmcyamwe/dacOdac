@@ -31,7 +31,7 @@ public class GetDoctor : BaseController // ControllerBase
     //oh doesnt show 200...could use to setup HATEOAS? toSee**
     public async Task<Results<Ok<Doctor>, NotFound, BadRequest<ProblemDetails>>> FetchDoctor([FromRoute] string id)
     {  //Task<Ok<Doctor>>   //Task<IResult>
-        if (id == null){
+        if (id == null || string.IsNullOrWhiteSpace(id)){
             return TypedResults.BadRequest<ProblemDetails>(new (){
                 Detail = "Id is not valid"
             }); //(Task<IResult>)Results.BadRequest();

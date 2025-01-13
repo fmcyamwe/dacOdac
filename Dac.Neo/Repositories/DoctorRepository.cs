@@ -90,18 +90,19 @@ namespace Dac.Neo.Repositories;
         }
 
         /// <summary>
-        /// Count of Doctors by Speciality.
+        /// List of Doctors by Speciality--filtering
         /// </summary>
         public async Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality()
         {
             //def gotta run this b4 hand!   
-            var query = @"MATCH (d:Doctor) WITH d RETURN distinct d.speciality, count(d)"; //ORDER BY d.speciality 
+            var query = @"MATCH (d:Doctor) 
+                        WITH DISTINCT d.speciality as speciality, count(d) as countSpe
+                        RETURN {speciality:speciality, count:countSpe} as y 
+                        ORDER BY y.speciality";
 
-            //IDictionary<string, object> parameters = new Dictionary<string, object> { { "searchString", speciality } };
+            var docCount = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "y");
 
-            var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d"); //parameters
-
-            return doctors;
+            return docCount;
 
         }
 
@@ -166,9 +167,22 @@ namespace Dac.Neo.Repositories;
         }
 
         /// <summary>
+        /// Get a count of all Doctors
+        /// </summary>
+        public async Task<long> GetDoctorCount()
+        {
+            var query = @"MATCH (d:Doctor) return count(d) as doctorCount";
+
+            var count = await _neo4jDataAccess.ExecuteReadScalarAsync<long>(query);
+            
+            _logger.LogInformation("GetDoctorCount {count}", count);
+            return count;
+        }
+
+        /// <summary>
         /// Get all patients treated by Doctor
         /// </summary>
-        public async Task<List<Dictionary<string, object>>> GetAllPatients(string id)
+        public async Task<List<Dictionary<string, object>>> GetOwnPatients(string id)
         {
             // toREview** AND r.from is not null
             //also just get the current patients--(not historical patients)--toReview**

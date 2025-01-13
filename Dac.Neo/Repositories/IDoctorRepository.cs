@@ -6,16 +6,13 @@ namespace Dac.Neo.Repositories;
         Task<List<Dictionary<string, object>>> GetAllDoctors(int skipPaginate);
         Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);
         Task<List<Dictionary<string, object>>> ListDoctorsBySpeciality(string speciality);
-        Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality(); //group
+        Task<List<Dictionary<string, object>>> DoctorsCountBySpeciality();
+        Task<long> GetDoctorCount();
         Task<string> AddDoctor(DoctorDB doc); 
         Task<string> RandomDoctor();
         Task<DoctorDB> FetchDoctorByID(string id); //requiere auth!
-       
         Task<string> AddPatientTreatment(string docId,string patientId, string name, string details);
-        
         Task<List<Dictionary<string, object>>> GetPendingRequests(string id);
         Task<string> UpdatePatientRequest(string doctorId, string action, string newStatus);
-
-        //Task<long> GetPatientsCount(string id); //redundant as could use below--testing** for now
-        Task<List<Dictionary<string, object>>> GetAllPatients(string id); //all patients of doctor
+        Task<List<Dictionary<string, object>>> GetOwnPatients(string id); //minimal info of current patients
     }

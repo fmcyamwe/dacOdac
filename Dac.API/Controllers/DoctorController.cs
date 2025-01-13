@@ -91,4 +91,20 @@ public class DoctorController : BaseController //ControllerBase
         return Results.NoContent(); //umm 204?
 
     }
+
+    //GET doctors/count
+    [Route("count")]
+    [HttpGet]
+    [Tags("Doctors")]
+    [EndpointSummary("Doctors count")]
+    [EndpointDescription("Get current Doctors count")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    public async Task<IResult> GetCurrentDoctorsCount()
+    {
+        var c = await _apiService.GetDoctorsCount();
+        return TypedResults.Ok(c);
+    }
 }

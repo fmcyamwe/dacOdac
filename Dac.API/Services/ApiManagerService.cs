@@ -23,10 +23,14 @@ public class ApiManagerService : IApiManagerService
         return _logger;
     }
 
-    public async Task<string[]> GetPatientCount()
+    public async Task<string[]> FetchRandomAccts() //todo** review for authorization
     {
         return await RandomLoginAccts();
-        //return  await _patientRepository.GetPatientCount();
+    }
+
+    public async Task<long> GetPatientsCount()
+    {
+        return  await _patientRepository.GetPatientCount();
     }
     
     public async Task<List<Dictionary<string, object>>> GetAllPatients(int pageSize, int pageIndex)
@@ -119,6 +123,11 @@ public class ApiManagerService : IApiManagerService
         return await _doctorRepository.GetAllDoctors(pageIndex >=1 ? pageSize*pageIndex : 0); //umm skip be 0 at first..toReview&+**
     }
 
+    public async Task<long> GetDoctorsCount()
+    {
+        return  await _doctorRepository.GetDoctorCount();
+    }
+
     public async Task<string> AddDoctor(Doctor doctor)
     {
         return await _doctorRepository.AddDoctor(Mapper.MapToDoctorNode(doctor));
@@ -148,7 +157,7 @@ public class ApiManagerService : IApiManagerService
 
     public async Task<List<Dictionary<string, object>>> GetDoctorPatients(string id)
     {
-        return await _doctorRepository.GetAllPatients(id);
+        return await _doctorRepository.GetOwnPatients(id);
     }
 
     public async Task<List<Dictionary<string, object>>> GetPatientRequests(string id) //PendingRequests

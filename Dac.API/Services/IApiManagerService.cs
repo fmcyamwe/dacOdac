@@ -7,11 +7,12 @@ public interface IApiManagerService
 {
     //string ExtractRedirectUriFromReturnUrl(string url);
     ILogger<ApiManagerService> GetLogger();
-    
+    Task<string[]> FetchRandomAccts(); //for testing---toRemove
+
     /////Patient/////
-    Task<string[]> GetPatientCount(); //for testing---toRemove
     Task<List<Dictionary<string, object>>> GetAllPatients(int pageSize, int pageIndex);
     Task<string> AddPatient(Patient person); //return string ID
+    Task<long> GetPatientsCount();
     Task<Patient> FetchPatientByID(string id, bool fetchAll); //requiere auth!
     Task<List<Dictionary<string, object>>> FetchPatientAttendingDoctors(string id);
     Task<Treatment> CurrentPatientTreatment(string id);
@@ -21,6 +22,7 @@ public interface IApiManagerService
 
     /////Doctor/////
     Task<List<Dictionary<string, object>>> GetAllDoctors(int pageSize, int pageIndex);
+    Task<long> GetDoctorsCount();
     Task<string> AddDoctor(Doctor doc); //auth
     Task<Doctor> FetchDoctorByID(string id); //requiere auth!
     Task<List<Dictionary<string, object>>> SearchDoctorByName(string lastName);

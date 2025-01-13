@@ -67,6 +67,22 @@ public class PatientController : BaseController  //ControllerBase
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
 
+    //GET patients/count
+    [Route("count")]
+    [HttpGet]
+    [Tags("Patients")]
+    [EndpointSummary("Patients count")]
+    [EndpointDescription("Get current Patients count")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), 500)]
+    public async Task<IResult> GetCurrentPatientsCount()
+    {
+        var c = await _apiService.GetPatientsCount();
+        return TypedResults.Ok(c);
+    }
+
     //POST patients/{id}/requests
     [Route("{id}/requests")]
     [HttpPost]

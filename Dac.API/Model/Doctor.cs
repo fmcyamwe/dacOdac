@@ -23,6 +23,8 @@ public class Doctor
     public string Speciality { get; set;}  //requiered definitely!
 
     //phone? or contact info...
+    //umm boolean for retired/active maybe?
+    
     [JsonPropertyName("practiseSince")]
     public DateTime? PractiseSince { get; set;} 
 
