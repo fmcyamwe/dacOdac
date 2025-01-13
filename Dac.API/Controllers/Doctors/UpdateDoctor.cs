@@ -1,10 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults; 
-
 
 using Dac.API.Model;
 using Dac.API.Services;
@@ -50,7 +46,7 @@ public class UpdateDoctor : BaseController
             Console.WriteLine("UpdateADoctor::ERROR {0}", ex);
             return TypedResults.NotFound();
         }
-        return await (Task<IResult>)Results.Ok(true);
+        //return await (Task<IResult>)Results.Ok(true);
     }
     
 }

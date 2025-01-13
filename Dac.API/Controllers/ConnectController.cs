@@ -14,14 +14,14 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 using Dac.API.Services;
 using Dac.API.Constants;
-using Dac.API.Extensions;
+using Dac.API.Model;
 
 namespace Dac.API.Controllers;
 
 public class ConnectController : BaseController 
 {
     //toReview** contains endpoints that dont belong in any Patient or Doctor controllers
-    //used to check for connect by UI
+    //used to check for connection by UI
     public ConnectController(IApiManagerService apiService) : base(apiService) 
     {}
 
@@ -31,8 +31,7 @@ public class ConnectController : BaseController
     [ExcludeFromDescription]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    [AllowAnonymous] //authorization
-    //[Authorize] //same as above...toTest* when enabled >> limit access to authenticated users for that controller or action.
+    [AllowAnonymous]
     public async Task<IResult> CanConnect()
     {//Ok<long>
         //TypedResults.Ok(); 
@@ -41,15 +40,15 @@ public class ConnectController : BaseController
         return TypedResults.Ok(await _apiService.FetchRandomAccts()); 
     }
 
-    // GET specialities  //hardcoded specialities for uniformity 
+    // GET specialities  //hardcoded specialities for data uniformity 
     [Route("specialities")]
-    [HttpGet] //huh () ? complains tho lol
+    [HttpGet]
     [ExcludeFromDescription]
     //[ProducesResponseType(StatusCodes.Status200OK)]
     //[ProducesResponseType(StatusCodes.Status204NoContent)]
     //[ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous]
-    public Ok<List<string>> FetchAllSpecialities() //
+    public Ok<List<string>> FetchAllSpecialities()
     {
         
         string[] hardcodedArray = new[] { 
@@ -105,11 +104,7 @@ public class ConnectController : BaseController
     }
 }
 
-public class LoginRequest
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
-}
+
 /*
 Pediatrician
 Family physian

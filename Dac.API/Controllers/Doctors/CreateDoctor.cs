@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults; 
 
 
@@ -28,8 +26,8 @@ public class CreateDoctor : BaseController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Results<Ok<string>, NotFound, BadRequest<ProblemDetails>>> AddDoctor([FromBody] Doctor doctor)
-    {
+    public async Task<IResult> AddDoctor([FromBody] Doctor doctor)
+    { //Task<Results<Ok<string>, NotFound, BadRequest<ProblemDetails>>>
         Console.WriteLine("AddDoctor {0} {1}", doctor?.FirstName ?? "", doctor?.LastName);
         if (doctor == null){
             return TypedResults.BadRequest<ProblemDetails>(new (){ //huh define new...
@@ -39,6 +37,5 @@ public class CreateDoctor : BaseController
         var p = await _apiService.AddDoctor(doctor); //_doctorRepository
         return TypedResults.Ok(p); 
         //todo** should return Created with url link to id >> TypedResults.Created($"/api/doctors/{doctor.Id}") 
-    }
-    
+    } 
 }

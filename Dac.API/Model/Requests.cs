@@ -1,9 +1,13 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-//using System.Text.Json.Serialization;
 
 namespace Dac.API.Model; 
+
+
+public class LoginRequest
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+}
 
 public record PaginationRequest(
     [property: Description("Number of items to return in single request")]
@@ -29,13 +33,6 @@ public record PatientRequest( // or ActionRequest (to handle multiple 'action' t
     [property: DefaultValue("")]
     string Action
 );
-/*
-{
-    "doctorId": "266721c1816c",
-    "reason": "Routine check-up",
-    "action": "visit"
-}
-*/
 
 //response to a PatientRequest by doctor
 public record DoctorActionResponse( 
@@ -81,7 +78,7 @@ public record TreatmentRequest(
 }*/
 
 //p{doctorId: d.id, doctorName: d.firstName+' '+d.lastName, speciality: d.speciality, since: r.since, fromAction: r.fromAction }";
-public record AttendingDoctor( //test
+public record AttendingDoctor(
     [property: Description("The patient's Id")]
     string DoctorId, 
 

@@ -27,9 +27,16 @@ public class DeletePatient : BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<IResult> DeleteAPatient([FromRoute] string id)
+    public async Task<IResult> DeleteAPatient([FromRoute] string id) //add auth--todo**
     {
-        return await (Task<IResult>)Results.Ok(true); //todo**
+        if(string.IsNullOrWhiteSpace(id)){
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Id is not valid"
+            });
+        }
+
+        await _apiService.DeletePatient(id); //umm check for existence? toReview**
+        return TypedResults.NoContent();
     }
     
 }

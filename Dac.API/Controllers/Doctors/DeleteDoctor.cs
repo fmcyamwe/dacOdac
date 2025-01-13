@@ -27,10 +27,15 @@ public class DeleteDoctor : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<IResult> DeleteADoctor([FromRoute] string id)
+    public async Task<IResult> DeleteADoctor([FromRoute] string id) //add auth >>todo**
     {
-        return await (Task<IResult>)Results.Ok(true); //todo**
+        if(string.IsNullOrWhiteSpace(id)){
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Id is not valid"
+            });
+        }
+
+        await _apiService.DeleteDoctor(id); //umm check for existence? toReview**
+        return TypedResults.NoContent();
     }
-    
-    
 }

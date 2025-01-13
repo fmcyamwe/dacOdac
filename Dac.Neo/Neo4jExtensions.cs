@@ -41,7 +41,6 @@ public static class Neo4jExtensions
             driver.VerifyConnectivityAsync();
         }catch(Exception e) {
             Console.WriteLine("ConfigureNeo4jService:: EXCEPTION VerifyConnectivityAsync >> {0}",e);
-            //toSee** if container remains up instead of borking...
             //driver.CloseAsync(); //--todo** //driver.CloseAsync()
         }
        

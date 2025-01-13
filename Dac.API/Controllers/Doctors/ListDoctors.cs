@@ -28,8 +28,9 @@ public class ListDoctors : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Ok<List<Dictionary<string, object>>>> GetAllDoctors([FromQuery] PaginationRequest paginationRequest)
-    {    //[AsParameters] PaginationRequest paginationRequest) //[AsParameters] dont work......fromQuery does >> //doctors?PageSize=10&PageIndex=0'
+    public async Task<IResult> GetAllDoctors([FromQuery] PaginationRequest paginationRequest)
+    {    //Task<Ok<List<Dictionary<string, object>>>>
+        //[AsParameters] PaginationRequest paginationRequest) //[AsParameters] dont work......fromQuery does >> //doctors?PageSize=10&PageIndex=0'
     
          _apiService.GetLogger().LogInformation("GetAllDoctors :: PaginationRequest {index} > {size} ", paginationRequest.PageIndex, paginationRequest.PageSize);
          
@@ -45,19 +46,19 @@ public class ListDoctors : BaseController
     [Route("doctors/speciality")]
     [HttpGet]
     [Tags("Doctors")]
-    [EndpointSummary("Doctors by Speciality")]
+    [EndpointSummary("List Doctors by Speciality")]
     [EndpointDescription("List Doctors by Speciality")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     [AllowAnonymous] //authorization
-    public Task<List<Dictionary<string, object>>> FetchDoctorsBySpeciality([FromQuery(Name = "q")] string search)
-    {
-        //todo** check that not malformed?
+    public async Task<IResult> FetchDoctorsBySpeciality([FromQuery(Name = "q")] string search)
+    {//Task<List<Dictionary<string, object>>>
+        
         //also  >> NotFound();
-        return _apiService.ListDoctorsBySpeciality(search); //_doctorRepository
+        return TypedResults.Ok(await _apiService.ListDoctorsBySpeciality(search)); 
     }
     
-    //Get doctors/speciality
+    //Get doctors/speciality //umm moot?
     [Route("doctors/speciality/count")]
     [HttpGet]
     [Tags("Doctors")]
@@ -65,10 +66,9 @@ public class ListDoctors : BaseController
     [EndpointDescription("Count of Doctors by Speciality")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    [AllowAnonymous] //authorization
-    public Task<List<Dictionary<string, object>>> CountDoctorsBySpeciality()
-    {
-       
-        return _apiService.DoctorsCountBySpeciality();
+    [AllowAnonymous]
+    public async Task<IResult> CountDoctorsBySpeciality() 
+    {//Task<List<Dictionary<string, object>>>
+        return TypedResults.Ok(await _apiService.DoctorsCountBySpeciality());
     }
 }

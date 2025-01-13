@@ -30,7 +30,7 @@ public class UpdatePatient : BaseController // ControllerBase
     public async Task<IResult> UpdateAPatient([FromRoute] string id, [FromBody] Patient patient)
     {
         
-        if (patient == null)
+        if (patient == null || string.IsNullOrWhiteSpace(id))
         {
             return TypedResults.BadRequest<ProblemDetails>(new (){
                 Detail = "Malformed request :("
@@ -48,13 +48,10 @@ public class UpdatePatient : BaseController // ControllerBase
             await _apiService.AddPatient(p); //kinda cheating--toFix**
 
             return Results.NoContent();
+
         }catch (Exception ex){
             Console.WriteLine("UpdateAPatient::ERROR {0}", ex);
             return TypedResults.NotFound();
         }
-        
-
-       // return await (Task<IResult>)Results.Ok(true); //todo**
     }
-    
 }

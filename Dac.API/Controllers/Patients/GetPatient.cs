@@ -1,13 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Authentication.JwtBearer; 
 
 
 using Dac.API.Model;
@@ -17,7 +10,7 @@ namespace Dac.API.Controllers.Patients;
 
 //[Route("patients")]
 //[ApiController]
-public class GetPatient : BaseController // ControllerBase
+public class GetPatient : BaseController
 {
     public GetPatient(IApiManagerService apiService) : base(apiService)
     {}
@@ -33,12 +26,12 @@ public class GetPatient : BaseController // ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 400)]//StatusCodes.Status400BadRequest  >>prolly no need? --toReview**
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     //oh doesnt show 200...could use to setup HATEOAS? toSee**
-    public async Task<Results<Ok<Patient>, NotFound, BadRequest<ProblemDetails>>> FetchPatient([FromRoute] string id)
-    {  //Task<Ok<Patient>>   //Task<IResult>
-        if (id == null){
+    public async Task<IResult> FetchPatient([FromRoute] string id)
+    {  //Task<Results<Ok<Patient>, NotFound, BadRequest<ProblemDetails>>>   
+        if(id == null || string.IsNullOrWhiteSpace(id)){
             return TypedResults.BadRequest<ProblemDetails>(new (){
                 Detail = "Id is not valid"
-            }); //(Task<IResult>)Results.BadRequest();
+            });
         }
 
         var p = await _apiService.FetchPatientByID(id, true); //todo** catch any exception here!
@@ -46,22 +39,6 @@ public class GetPatient : BaseController // ControllerBase
         //(Task<IResult>)Results.Ok();
         //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
-
-    /*
-    // GET patients/count
-    [Route("patients/count")]
-    [HttpGet]
-    [Tags("Patients")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), 500)]
-    [AllowAnonymous] //authorization
-    //[Authorize] //same as above...toTest* when enabled >> limit access to authenticated users for that controller or action.
-    public async Task<Ok<long>> GetPatientsCount() //oldie >>Task<long>
-    {   
-        var c = await _apiService.GetPatientCount();  //_patientRepository.GetPatientCount();
-
-        return TypedResults.Ok(c); 
-    }*/
 
     //GET patients/ 
     [Route("patients/{id}/more")]
@@ -73,13 +50,12 @@ public class GetPatient : BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     //[Authorize]
-    //[Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
-    public async Task<Ok<List<Dictionary<string, object>>>> GetPatientMedicalHistory([FromRoute] string id)
-    {
+    //[Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role --todo**
+    public async Task<IResult> GetPatientMedicalHistory([FromRoute] string id)
+    { //Task<Ok<List<Dictionary<string, object>>>> 
         var c = await _apiService.PatientMedicalHistory(id); 
 
         return TypedResults.Ok(c); 
-
     }
 
 }

@@ -14,7 +14,7 @@ namespace Dac.API.Controllers.Patients;
 
 //[Route("patients")]
 //[ApiController]
-public class ListPatients : BaseController // ControllerBase
+public class ListPatients : BaseController
 {
     public ListPatients(IApiManagerService apiService) : base(apiService)
     {}
@@ -31,17 +31,12 @@ public class ListPatients : BaseController // ControllerBase
     //[Authorize]
     [Authorize(Roles = "admin",AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // Accessible only to Admin role
     //--seem needed as default authorize above fails :( ..or should just set Roles = "" ? toTry**
-    public async Task<Ok<List<Dictionary<string, object>>>> GetAllPatients([FromQuery] PaginationRequest paginationRequest)
-    {//List<Patient>  //IResult //Task<ActionResult<bool>>
-        
+    public async Task<IResult> GetAllPatients([FromQuery] PaginationRequest paginationRequest)
+    {//Task<Ok<List<Dictionary<string, object>>>>
+    
         //this actually is the minimum info for Patients (doesnt include Treatment,etc) <would need auth for extra details>
         
-        var p = await _apiService.GetAllPatients(paginationRequest.PageSize, paginationRequest.PageIndex); //_patientRepository
+        var p = await _apiService.GetAllPatients(paginationRequest.PageSize, paginationRequest.PageIndex);
         return TypedResults.Ok(p); 
-
-        //Results.Ok();//return TypedResults.Ok();
-        //return (Task<IResult>)Results.Ok(true); 
-        //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
     }
-    
 }

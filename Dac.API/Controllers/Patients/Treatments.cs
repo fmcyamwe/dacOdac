@@ -13,7 +13,7 @@ namespace Dac.API.Controllers.Patients;
 
 //[Route("patients")]
 //[ApiController]
-public class Treatments : BaseController // ControllerBase
+public class Treatments : BaseController
 {
     public Treatments(IApiManagerService apiService) : base(apiService)
     {}
@@ -29,10 +29,15 @@ public class Treatments : BaseController // ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     public async Task<IResult> GetPatientTreatments([FromRoute] string id)
     {
-        //return (Task<IResult>)Results.Ok(true);  //todo** surface with .CurrentPatientTreatment(id)
-        var p = await _apiService.CurrentPatientTreatment(id);
+        if (id == null || string.IsNullOrWhiteSpace(id)){
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Id is not valid"
+            }); //(Task<IResult>)Results.BadRequest();
+        }
 
-        return TypedResults.Ok(p); //no complains?!?
+        return TypedResults.Ok(await _apiService.CurrentPatientTreatment(id));
+
+        //return TypedResults.Ok(p); //no complains?!?
     }
 
     //POST patients/{id}/treatments
@@ -45,7 +50,7 @@ public class Treatments : BaseController // ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IResult> AddPatientTreatment([FromRoute] string id, [FromBody] TreatmentRequest treatment)
     {
-         //(Task<IResult>)Results.Ok(true);
+        //(Task<IResult>)Results.Ok(true);
         if (treatment == null || id.Length == 0 || id != treatment.PatientId) // id == treatment.patientId >>should
         {
             return TypedResults.BadRequest<ProblemDetails>(new (){

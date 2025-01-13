@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults; 
 
 
@@ -18,10 +16,7 @@ public class PatientController : BaseController  //ControllerBase
     //protected readonly IApiManagerService _apiService;  //through service 
 
     public PatientController(IApiManagerService apiService) : base(apiService) 
-    {
-        //_patientRepository = patientRepository;
-        //_apiService = apiService;
-    }
+    {}
 
     //TypedResults.Ok(); 
     //todo** use TypedResults<IResult> for ease of unit testing
@@ -36,18 +31,18 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Results<Ok<List<Dictionary<string, object>>>, NotFound, BadRequest<ProblemDetails>>> SearchPatientByName([FromQuery(Name = "firstname")] string first,[FromQuery(Name = "lastname")] string last)
-    {//Task<List<Dictionary<string, object>>> 
+    public async Task<IResult> SearchPatientByName([FromQuery(Name = "firstname")] string first,[FromQuery(Name = "lastname")] string last)
+    {//Task<Results<Ok<List<Dictionary<string, object>>>, NotFound, BadRequest<ProblemDetails>>>
 
         //todo** check that not malformed?
         //also  >> NotFound();
-        if (first == null || last == null || first.Length == 0|| last.Length == 0){
+        if (first == null || last == null || first.Length == 0 || last.Length == 0){
             return TypedResults.BadRequest<ProblemDetails>(new (){
                 Detail = "Name cannot be empty"
-            }); //(Task<IResult>)Results.BadRequest();
+            });
         }
-        var p = await _apiService.SearchPatientByFullName(first, last); //_patientRepository
-        return TypedResults.Ok(p); 
+        return TypedResults.Ok(await _apiService.SearchPatientByFullName(first, last));
+        //return TypedResults.Ok(p);
     }
 
     //GET patients/{id}/doctors
@@ -59,12 +54,15 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<IResult> GetCurrentPatientDoctor([FromRoute] string id)
+    public async Task<IResult> FetchPatientDoctors([FromRoute] string id)
     {
-        //return (Task<IResult>)Results.Ok(true); //todo**
-        var c = await _apiService.FetchPatientAttendingDoctors(id); //
-        return TypedResults.Ok(c);
-        //Results.Ok(List<Patient>>);//TypedResults.Ok(); //Task<Ok<List<Patient>>>
+        if(id == null || string.IsNullOrWhiteSpace(id)){
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Id is not valid"
+            });
+        }
+
+        return TypedResults.Ok(await _apiService.FetchPatientAttendingDoctors(id)); 
     }
 
     //GET patients/count
@@ -79,8 +77,7 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 500)]
     public async Task<IResult> GetCurrentPatientsCount()
     {
-        var c = await _apiService.GetPatientsCount();
-        return TypedResults.Ok(c);
+        return TypedResults.Ok(await _apiService.GetPatientsCount());
     }
 
     //POST patients/{id}/requests
@@ -92,10 +89,16 @@ public class PatientController : BaseController  //ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), 500)]
-    public async Task<Ok<string>> CreateRequest([FromRoute] string id,[FromBody] PatientRequest request)  //Task<IResult> 
+    public async Task<IResult> CreateRequest([FromRoute] string id,[FromBody] PatientRequest request)
     {
-        var c = await _apiService.CreatePatientRequest(id, request);
-        return TypedResults.Ok(c); //Results.Ok(true); //Task<IResult> 
-    }
+        if(id == null || string.IsNullOrWhiteSpace(id) || request == null){
+            return TypedResults.BadRequest<ProblemDetails>(new (){
+                Detail = "Malformed request :("
+            });
+        }
 
+        //todo** handle errors!!>>check that doctor exists**
+        return TypedResults.Ok(await _apiService.CreatePatientRequest(id, request));
+        //return TypedResults.Ok(c);
+    }
 }
