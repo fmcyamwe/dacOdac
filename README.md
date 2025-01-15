@@ -4,15 +4,15 @@ Take home Assignment
 
 ### Project Overview
 
-.NET-based REST API that performs CRUD operations on Patient and Doctor entities, highlighting the relationships between these two entities.
+* .NET-based REST API that performs CRUD operations on Patient and Doctor entities, highlighting the relationships between these two entities.
 
-.Data storage using Neo4j, with a schema of your own design.
+* Data storage using Neo4j, with a schema of your own design.
 
-.A simple web UI built using:
-  HTML5, JavaScript, and CSS; or
-  Frameworks like Bootstrap, Material UI, or a popular front-end framework such as React, Angular, or Vue.
+* A simple web UI built using:  
+      HTML5, JavaScript, and CSS; or  
+      Frameworks like Bootstrap, Material UI, or a popular front-end framework such as React, Angular, or Vue.
 
-.Secure storage and retrieval of all sensitive/personal identifying information.
+* Secure storage and retrieval of all sensitive/personal identifying information.
 
 
 ### Technology Stack
@@ -86,7 +86,7 @@ The retrieval of sensitive information was addressed at the database level with 
 
 ### Challenges and Solutions
 
-Honestly **could have done** the API way quicker in another language (2 or 3 days in Go) BUT the _learning_ curve of C# after __7 years__ not coding in it was much sharper than expected!
+Honestly **could have done** the API quickly in another language (2 or 3 days in Go) BUT the _learning_ curve of C# after __7 years__ not coding in it was much sharper than expected!
 
 I encountered many stumbling blocks that provided some awesome learnings but without knowing how this was evaluated, I just tried to cram all the requirements in, focusing more on the Graph queries for data consistency along with the UI interactions to surface Patient-Doctor relationships as they change through time.
 
@@ -94,9 +94,9 @@ Attempts to have it deployed via docker images were partially successful as some
 
 A list of roadblocks encountered:
 
--Dependency Injection...sheesh! (I last encountered dependency injection 7 years ago --using C# at my previous job-- kid you not!) but it seems to have become a bigger part of the language than I recall. It did prompt me to look up how it is done in other languages. For Golang, Structs and Interfaces are used clearly that it feels (imo) more natural; though I believe the manual way of creating dependencies in Go leads to less magic behind the scenes, until a project becomes complex that using libraries and toolkits is requiered, then the magic can start to be somewhat equivalent (it took me at least a day to wrap my mind around DI)
+- Dependency Injection...sheesh! (I last encountered dependency injection 7 years ago --using C# at my previous job-- kid you not!) but it seems to have become a bigger part of the language than I recall. It did prompt me to look up how it is done in other languages. For Golang, Structs and Interfaces are used clearly that it feels (imo) more natural; though I believe the manual way of creating dependencies in Go leads to less magic behind the scenes, until a project becomes complex that using libraries and toolkits is requiered, then the magic can start to be somewhat equivalent (it took me at least a day to wrap my mind around DI)
 
--The deserialization of database AND JSON data objects! 
+- The deserialization of database AND JSON data objects! 
  For JSON, my first attempt was using annotations, which did help, however using the NewtonsoftJson fixed that troublesome issue!
  For Neo4j node objects, it was harder to fix. My first attempt to fix this was using the 'Neo4j.Driver.Extensions' package to annotate Model classes. Already using the 'Neo4J.Driver' for database access, both packages had dependencies on another package with conflicting versions (.NETStandard 2.1 vs .NETStandard 2.0) so I had to downgrade the 'Neo4J.Driver' package version while using an alias--see Dac.Neo project file.
  This mismatch might be the cause of docker containers failing to connect? --still trying to determine this but with the recent changes to the docker compose file plus adding guardrail in the [Neo4jExtension file](Dac.Neo/Neo4jExtensions.cs), the container stays up long enough to investigate  and I surmise it's probably a port or DNS issue.
@@ -106,7 +106,7 @@ A list of roadblocks encountered:
 
  Please do let me know if there is a better way for this issue--I would really appreciate some feedback on this.
 
--Also had a couple of annoyances fighting the auto-completion in VS code editor! Using tabs was a hazard :D
+- Also had a couple of annoyances fighting the auto-completion in VS code editor! Using tabs was a hazard :D
 
 
 ### Testing and Validation
@@ -123,4 +123,3 @@ I just hope to get those pesky docker containers working in time that running th
 
 I really would love some feedback(in any shape/form) and I thank you for looking at this.
 
-### Appendices
