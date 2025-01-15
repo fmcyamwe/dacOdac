@@ -7,26 +7,30 @@ services:
       - neo4jlogs:/logs
     environment:
       NEO4J_AUTH: neo4j/daccydac
+      ASPNETCORE_ENVIRONMENT: Docker
     networks:
       - dac_dac
     ports:
       - "7474:7474"
       - "7687:7687"
   api:
-    container_name: dacApi
+    container_name: dac-api
     build:
       context: .
       dockerfile: ./Dockerfile
     depends_on:
       - "neo4j"
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Docker
     networks:
       - dac_dac
+    volumes:
+      - /Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedPatient.json:/app/seedPatient.json
+      - /Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json:/app/seedDoctor.json
     expose:
       - "7687"
+      - "5113"
     ports:
-      - "5113:5113"
       - "8000:80"
 networks:
   dac_dac:

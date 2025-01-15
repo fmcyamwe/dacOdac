@@ -35,7 +35,7 @@ public static class Neo4jExtensions
             settings.Neo4jConnection, 
             AuthTokens.Basic(settings.Neo4jUser, settings.Neo4jPassword));
         
-        //verify connection...
+        //verify connection... bon no issue now with dns in docker...still can loopback in browser tho...
         try
         {
             driver.VerifyConnectivityAsync();
@@ -72,19 +72,12 @@ public static class Neo4jExtensions
             return;
         }//else{Console.WriteLine("CheckMigration::Seeder GOOD {0}",sd);} 
 
-        //Console.WriteLine("CheckMigration::Seeder GOOD {0} >> {1} >> {2}",sd,hEnv.ContentRootPath,hEnv.EnvironmentName);
-        ////>>wrong >>  /Users/florentcyamweshi/dacOdac/Dac.API >> Development
-        //string currentDir = Environment.CurrentDirectory;
-
-        //Console.WriteLine("CheckMigration::Seeder GOOD {0} ",currentDir);
-        //smdh also shows >>/Users/florentcyamweshi/dacOdac/Dac.API
-        ///Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json
-
-        //var sourcePath = Path.Combine(contentRootPath, "Data", "Configurations","seedPatient.json");
         
         bool populated = await sd.AlreadyPopulated(); 
         
         if(populated){
+            //await sd.SeedDoctorData(sourceDocPath); 
+            //await sd.SeedPatientData("/app/seedPatient.json"); //works too in docker
            return;
         }
 
@@ -92,9 +85,16 @@ public static class Neo4jExtensions
 
         await sd.CreateDoctorNodeConstraints();
                 
-        //seed graphDB with initial data...--toReview** use configuration Path instead of hardcoding
-        var e = await sd.SeedPatientData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedPatient.json");
-        var d = await sd.SeedDoctorData("/Users/florentcyamweshi/dacOdac/Dac.Neo/Data/Configurations/seedDoctor.json");
+        string currentDir = Environment.CurrentDirectory;
+        
+        var sourceDocPath = Path.Combine(currentDir,"seedDoctor.json");
+        var sourcePatientPath = Path.Combine(currentDir,"seedPatient.json");
+
+        Console.WriteLine("CheckMigration::PATH? {0} >> {1} {2}",currentDir, sourceDocPath,sourcePatientPath);
+        //todo** check existence
+
+        await sd.SeedDoctorData(sourceDocPath);
+        await sd.SeedPatientData(sourcePatientPath);
             
         ///also add some relationships?!? toReview**
        return;

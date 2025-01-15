@@ -29,13 +29,16 @@ WORKDIR "/app/Dac.Neo"
 RUN dotnet restore
 RUN dotnet build "./Dac.Neo.csproj" -c Release -o /app/build
 
+
 WORKDIR "/app/Dac.API"
 RUN dotnet restore
 RUN dotnet build "./Dac.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
 #weirdly cant find Dac.Neo..cause of workdir? >>nope...umm  well seems good with just line below
+# should copy those json here too? COPY --from=build /app/seedDoctor.json .
 RUN dotnet publish -c Release -o /app/publish
+#COPY *.json /app/publish # nope moot after RUN cmd smh
 
 #RUN dotnet publish "./Dac.Neo.csproj" -c Release -o /app/publish
 #RUN dotnet publish "./Dac.API.csproj" -c Release -o /app/publish
@@ -44,9 +47,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-#should expose swagger port? meh
-#EXPOSE 5113
-#EXPOSE 7687
+
+EXPOSE 5113
+EXPOSE 7687
 #EXPOSE 7474
 #CMD ["dotnet", "Dac.Neo.dll"]
 ENTRYPOINT ["dotnet", "Dac.API.dll"]

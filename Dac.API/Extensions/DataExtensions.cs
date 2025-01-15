@@ -5,9 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.OpenApi.Models;
 
 using Dac.Neo;
 using Dac.API.Services;
@@ -20,7 +17,7 @@ namespace Dac.API.Extensions;
 public static class DataExtensions
 {
     
-    public static void AddApplicationServices(this IHostApplicationBuilder builder) //removed async
+    public static async void AddApplicationServices(this IHostApplicationBuilder builder)
     {
         
         var services = builder.ConfigureNeo4jService();
@@ -129,9 +126,9 @@ public static class DataExtensions
         
         
         var sp = services.BuildServiceProvider(); 
-
+        
         //seed Graph DB
-        Neo4jExtensions.CheckMigration(sp); //umm builder.Environment? >>nope
+        Neo4jExtensions.CheckMigration(sp); //todo** await
     }
 
     public static IEndpointRouteBuilder MapApiV1(this IEndpointRouteBuilder app)
