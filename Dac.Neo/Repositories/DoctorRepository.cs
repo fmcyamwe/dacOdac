@@ -117,12 +117,13 @@ public class DoctorRepository : IDoctorRepository
     public async Task<List<Dictionary<string, object>>> GetAllDoctors(int skipPaginate) ///todo** pass in pageRequest too...
     {
         var query = @"Match (d:Doctor)
-            RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } 
-            ORDER BY d.lastName SKIP $skip LIMIT 3"; //default 10 
-                                                     //order by?
-                                                     //coalesce for missing info prolly --todo**
-                                                     //should upper-case first letter --todo**
+                    RETURN d{ Id: d.id, firstName: d.firstName, lastName: d.lastName, speciality: d.speciality } 
+                    ORDER BY d.lastName SKIP $skip LIMIT 3"; 
+            //default 10 
+            //coalesce for missing info prolly --todo**
+
         IDictionary<string, object> parameters = new Dictionary<string, object> { { "skip", skipPaginate } };
+
         var doctors = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "d", parameters);
 
         _logger.LogInformation("GetAllDoctors {count}", doctors.Count);
@@ -138,10 +139,9 @@ public class DoctorRepository : IDoctorRepository
     {
         //todo**MATCH (n:Patient)-[r:PATIENT_OF]-() RETURN n, count(DISTINCT r) AS num
         var query = @"Match (d:Doctor)<-[r:REQUESTED]-() with d, count(distinct r) as i 
-                        RETURN d.id ORDER BY i desc limit 1";
+                    RETURN d.id ORDER BY i desc limit 1";
 
         return await _neo4jDataAccess.ExecuteReadScalarAsync<string>(query);
-
     }
 
     /// <summary>
@@ -168,7 +168,6 @@ public class DoctorRepository : IDoctorRepository
         var query = @"MATCH p=(d:Doctor)<-[r:REQUESTED {status: 'pending', action: $action}]-(a:Patient)
                         WHERE d.id = $docId SET r.status= $newStatus, r.updatedAt = timestamp()
                         RETURN a.id"; //r.status //r{patientId:a.id, action:r.action, reason:r.reason, on:r.date}
-                                      //
                                       //todo* use CASE to make into single query...
 
         IDictionary<string, object> parameters = new Dictionary<string, object> {

@@ -10,5 +10,11 @@
     "FirstName": "Mike",
     "LastName": "Mao",
     "Speciality": "Geneticist"
+  },
+  {
+    "Id": "3",
+    "FirstName": "Mina",
+    "LastName": "Burn",
+    "Speciality": "Hematologist"
   }
 ]

@@ -96,28 +96,30 @@ public class PatientRepository : IPatientRepository
     {
 
         var query = @"MATCH (d:Patient)-[r:REQUESTED]-() with d, count(distinct r) as i 
-                        RETURN d.id order by i desc limit 1";
+                    RETURN d.id order by i desc limit 1";
 
         return await _neo4jDataAccess.ExecuteReadScalarAsync<string>(query);
         //return count;
     }
 
+    /// <summary>
+    /// Patient Request from a Doctor that can end up with a Doctor-Patient relation
+    /// </summary>
     public async Task<string> CreatePatientRequest(string patientId, string docId, string action, string reason)
     {
         var query = @"MATCH (p:Patient) WHERE p.id = $patientId 
-                        MATCH (d:Doctor) WHERE d.id = $docId
-                        WITH p, d
-                        MERGE (p)-[r:REQUESTED {action: $action, reason:$reason, status:'pending', date:timestamp()}]->(d)
-                        RETURN r.status";
-        //status could be needed--toReview
-
-
-        IDictionary<string, object> parameters = new Dictionary<string, object> {
-                { "patientId",patientId },
-                { "docId", docId},
-                { "action",action},
-                { "reason",reason}
-            };
+                    MATCH (d:Doctor) WHERE d.id = $docId
+                    WITH p, d
+                    MERGE (p)-[r:REQUESTED {action: $action, reason:$reason, status:'pending', date:timestamp()}]->(d)
+                    RETURN r.status";
+        
+        IDictionary<string, object> parameters = new Dictionary<string, object> 
+        {
+            { "patientId",patientId },
+            { "docId", docId},
+            { "action",action},
+            { "reason",reason}
+        };
 
         _logger.LogInformation("CreatePatientRequest {patient}--{action}->{docId}", patientId, action, docId);
 
@@ -129,10 +131,12 @@ public class PatientRepository : IPatientRepository
     /// </summary>
     public async Task<List<Dictionary<string, object>>> GetAllPatients(int skipPaginate) //todo** pass in pageRequest too...
     {
-        var query = @"Match (p:Patient) RETURN p{ Id: p.id, firstName: p.firstName, lastName: p.lastName } ORDER BY p.lastName SKIP $skip LIMIT 3"; //default 10
-                                                                                                                                                    //order by?
-                                                                                                                                                    //coalesce for missing info prolly --todo**
-                                                                                                                                                    //should upper-case first letter --todo**
+        var query = @"Match (p:Patient) RETURN p{ Id: p.id, firstName: p.firstName, lastName: p.lastName } 
+                    ORDER BY p.lastName SKIP $skip 
+                    LIMIT 3"; 
+        //default 10..todo* readd after pagination tests
+        //coalesce for missing info prolly --todo**
+
         IDictionary<string, object> parameters = new Dictionary<string, object> { { "skip", skipPaginate } };
 
         var patients = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, "p", parameters); //skip

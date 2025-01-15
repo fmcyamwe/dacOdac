@@ -47,9 +47,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-
-EXPOSE 5113
-EXPOSE 7687
+#EXPOSE 5113
+#EXPOSE 7687
 #EXPOSE 7474
 #CMD ["dotnet", "Dac.Neo.dll"]
 ENTRYPOINT ["dotnet", "Dac.API.dll"]

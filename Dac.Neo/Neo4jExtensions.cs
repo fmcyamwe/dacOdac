@@ -63,9 +63,8 @@ public static class Neo4jExtensions
         return services;
     }
 
-    public static async void CheckMigration(IServiceProvider sp) //IHostEnvironment hEnv
+    public static async void CheckMigrations(IServiceProvider sp)
     {
-       
         var sd = sp.GetService<ISeeder>();
         if (sd == null){
             Console.WriteLine("CheckMigration::Seeder == null>> ERROR!! Aborting :(...");
@@ -76,8 +75,6 @@ public static class Neo4jExtensions
         bool populated = await sd.AlreadyPopulated(); 
         
         if(populated){
-            //await sd.SeedDoctorData(sourceDocPath); 
-            //await sd.SeedPatientData("/app/seedPatient.json"); //works too in docker
            return;
         }
 
@@ -90,13 +87,16 @@ public static class Neo4jExtensions
         var sourceDocPath = Path.Combine(currentDir,"seedDoctor.json");
         var sourcePatientPath = Path.Combine(currentDir,"seedPatient.json");
 
-        Console.WriteLine("CheckMigration::PATH? {0} >> {1} {2}",currentDir, sourceDocPath,sourcePatientPath);
+        //Console.WriteLine("CheckMigration::PATH? {0} >> {1} {2}",currentDir, sourceDocPath,sourcePatientPath);
         //todo** check existence
 
-        await sd.SeedDoctorData(sourceDocPath);
-        await sd.SeedPatientData(sourcePatientPath);
+        var lstDoctors = await sd.SeedDoctorData(sourceDocPath);
+        var lstPatients = await sd.SeedPatientData(sourcePatientPath);
             
-        ///also add some relationships?!? toReview**
+        ///also add some relationships...
+        await sd.SeedRelations(lstDoctors, lstPatients);
+        Console.WriteLine("Seeding::Done >> {0} && {1}",lstDoctors.Count,lstPatients.Count);
+
        return;
     }
 }

@@ -12,5 +12,19 @@
     "LastName": "Muyango",
     "Gender":"male",
     "Born": 1990
+  },
+  {
+    "Id": "3",
+    "FirstName": "LaGrand",
+    "LastName": "Blonde",
+    "Gender":"female",
+    "Born": 1988
+  },
+  {
+    "Id": "4",
+    "FirstName": "JeSuis",
+    "LastName": "Maladif",
+    "Gender":"male",
+    "Born": 1998
   }
 ]

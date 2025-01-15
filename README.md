@@ -100,9 +100,11 @@ A list of roadblocks encountered:
  For JSON, my first attempt was using annotations, which did help, however using the NewtonsoftJson fixed that troublesome issue!
  For Neo4j node objects, it was harder to fix. My first attempt to fix this was using the 'Neo4j.Driver.Extensions' package to annotate Model classes. Already using the 'Neo4J.Driver' for database access, both packages had dependencies on another package with conflicting versions (.NETStandard 2.1 vs .NETStandard 2.0) so I had to downgrade the 'Neo4J.Driver' package version while using an alias--see Dac.Neo project file.
  This mismatch might be the cause of docker containers failing to connect? --still trying to determine this but with the recent changes to the docker compose file plus adding guardrail in the [Neo4jExtension file](Dac.Neo/Neo4jExtensions.cs), the container stays up long enough to investigate  and I surmise it's probably a port or DNS issue.
+   > Update: It was a DNS issue. The API and Neo4J containers now connect successfully! 
+   >> Still having issues pointing the localhost IP (localhost:5113) in the UI container to the API container. Unfortunately, when the UI is accessed from a browser, it seems a reverse proxy is needed to forward requests properly via dns! So far no luck and a nice challenge playing with nginx.
 
  I realize now at the end that I could have aliased Node properties instead of fetching the whole Node or even adding extension methods but alas...
- This is where my lack of familiarity was a bit crippling and as a result there are many redundant data access methods that could be merged into a single query. I also manually mapped models to/from DB models until I saw there are mapping libraries out there!
+ This is where my lack of familiarity was a bit crippling and as a result there are many redundant data access methods that could be merged into single queries. I also manually mapped models to/from DB models until I saw that there are mapping libraries out there!
 
  Please do let me know if there is a better way for this issue--I would really appreciate some feedback on this.
 
