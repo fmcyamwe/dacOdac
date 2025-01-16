@@ -17,11 +17,11 @@ Take home Assignment
 
 ### Technology Stack
 
-DB: Neo4J Graph database
-API: .NET API (controller based)
-UI: Quasar framework based on Vue.JS and placed in another [github repository](https://github.com/fmcyamwe/dacWeb)
++DB: Neo4J Graph database  
++API: .NET API (controller based)  
++UI: Quasar framework based on Vue.JS and placed in another [github repository](https://github.com/fmcyamwe/dacWeb)  
 
-Deployed using Docker containers--ran into issues:(see below) that I hope to fix.
+Deployed using Docker containers--with some issues:(see below) that I hope to fix.
 
 
 ### System Architecture
@@ -39,12 +39,12 @@ The web UI drives most of the interactions between the Patient and Doctor, thoug
 
 String IDs were used instead of Neo4J's brittle IDs, for better robustness. These are generated via GUID on entity creation and checked for uniqueness, saving just the last 12 characters.
 
-1. Constraints on Patient
+1. Constraints on Patient Entity
    1. Patients have unique first and last names with the Patient node also storing both pre-normalized upper cased names for searching and updating.
-   2. Patient nodes have generated 'id' that is the Node key for lookups.--it cannot be empty and is unique.
+   2. Patient nodes have a generated 'Id' that is the Node key for lookups.--it cannot be empty and is unique.
 
-2. Constraints on Doctor  
-   1. Choice to have Doctor Node Key as a combination of the generated 'Id', upper cased last Name (stored along the original last Name) and the Doctor's 'speciality'. This would allow multiple doctors of the same last name with different specialities. Also the specialities are a hard-coded list that gets fetched on one of the endpoints.
+2. Constraints on Doctor Entity  
+   1. Choice was made to have the Doctor's Node key as a combination of the generated 'Id', upper cased last Name (stored along the original last Name) and the Doctor's 'speciality'. This would allow multiple doctors with the same last name but different specialities. Also the specialities are a hard-coded list that gets fetched on one of the endpoints for use in the UI.
 
 3. Relationships  
    1. A Patient can 'Request' action from a Doctor who can agree/dismiss it (automatically creating a Doctor<>Patient) relationship. The patient can have multiple attending doctors (as in real life?)
@@ -86,7 +86,7 @@ The retrieval of sensitive information was addressed at the database level with 
 
 ### Challenges and Solutions
 
-Honestly **could have done** the API quickly in another language (2 or 3 days in Go) BUT the _learning_ curve of C# after __7 years__ not coding in it was much sharper than expected!
+Honestly **could have completed** the API quickly in another language (2 or 3 days in Go) BUT the _learning_ curve of C# after __7 years__ not coding in it was much sharper than expected!
 
 I encountered many stumbling blocks that provided some awesome learnings but without knowing how this was evaluated, I just tried to cram all the requirements in, focusing more on the Graph queries for data consistency along with the UI interactions to surface Patient-Doctor relationships as they change through time.
 
@@ -119,7 +119,7 @@ Used TypedResults<IResult> for endpoints return for the ease of future unit test
 
 ### Future Considerations
 
-This is still a work in progress and after limiting the scope, there is still lots to do. I am certain that I shall keep working on this as leaving unfinished work is anathema with me. Plus after the earlier stumbling, it is much easier not and I still have lots to learn and improve on :)
+This is still a work in progress and after limiting the scope, there is still lots to do. I am certain that I shall keep working on this as leaving unfinished work is anathema with me. Plus after the early stumblings, it is much easier now with lots to learn and improve on :)
 
 I just hope to get those pesky docker containers working in time that running them wont be an issue. I have rambled too much and it's better interacting with an app than wading through code. My apologies that I didnt even do a schema graph design but hopefully it will be there by the time you read this. 
 
